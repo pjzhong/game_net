@@ -1,22 +1,13 @@
 package org.pj.net;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import org.pj.common.NamedThreadFactory;
-import org.pj.net.handler.WebSocketDecoder;
-import org.pj.net.handler.WebSocketEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +22,7 @@ public class TcpServer {
     this.port = port;
   }
 
-  public void startUp(ChannelHandler handler) throws Exception {
+  public void startUp(ChannelInitializer initializer) throws Exception {
     bootstrap = new ServerBootstrap();
     NioEventLoopGroup boss = new NioEventLoopGroup(0, new NamedThreadFactory("netty-boss"));
     NioEventLoopGroup worker = new NioEventLoopGroup(0, new NamedThreadFactory("netty-worker"));
@@ -44,31 +35,11 @@ public class TcpServer {
     bootstrap.childOption(ChannelOption.SO_SNDBUF, 128 * 1024);
 
     bootstrap.handler(new LoggingHandler(LogLevel.DEBUG));
+    bootstrap.childHandler(initializer);
+
+
+    bootstrap.bind(port).sync().await();
+
+    logger.info("Tcp server, start at:{}", port);
   }
-
-  static class WebSocketHandler extends ChannelInitializer {
-
-    private ChannelHandler handler;
-
-    public WebSocketHandler(ChannelHandler handler) {
-      this.handler = handler;
-    }
-
-    @Override
-    protected void initChannel(Channel ch) throws Exception {
-      ChannelPipeline pip = ch.pipeline();
-
-      pip.addLast(new HttpServerCodec());
-      pip.addLast(new HttpObjectAggregator(65536));
-      pip.addLast(new WebSocketServerCompressionHandler());
-      pip.addLast(new WebSocketServerProtocolHandler("/"));
-      pip.addLast(new WebSocketDecoder());
-      pip.addLast(new WebSocketEncoder());
-      //TODO My Message Decoder
-      pip.addLast(handler);//TODO MY Message Handler
-
-    }
-  }
-
-
 }

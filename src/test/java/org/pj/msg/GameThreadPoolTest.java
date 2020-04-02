@@ -1,5 +1,6 @@
 package org.pj.msg;
 
+import io.netty.channel.ChannelId;
 import io.netty.channel.DefaultChannelId;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,15 +14,15 @@ public class GameThreadPoolTest {
   public void nettyChannelIdTest() {
     GameThreadPool pool = new GameThreadPool();
     for (int i = 0; i < 100000; i++) {
-      pool.getPool(DefaultChannelId.newInstance());
+      ChannelId id = DefaultChannelId.newInstance();
+      pool.getPool(id);
     }
 
     Map<Integer, Long> stats = pool.getHashStat();
     List<Long> statList = new ArrayList<>(stats.values());
-    System.out.println(stats);
     System.out.format("min:%s\n", Collections.min(statList));
     System.out.format("max:%s\n", Collections.max(statList));
-
+    System.out.println(stats);
     List<Long> diffs = new ArrayList<>();
     int size = statList.size();
     for (int i = 1; i < size; i++) {
