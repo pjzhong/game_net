@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration status="INFO">
+
+    <Loggers>
+        <Root level="DEBUG">
+            <AppenderRef ref="console"/>
+        </Root>
+    </Loggers>
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT" >
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <Pattern>%d [%-p] [%t] %c{1}.%M - %m%n</Pattern>
+            </PatternLayout>
+        </Console>
+    </Appenders>
+</Configuration>
+

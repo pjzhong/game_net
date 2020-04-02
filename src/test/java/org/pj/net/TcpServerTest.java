@@ -28,7 +28,7 @@ public class TcpServerTest {
     client.connectBlocking();
     client.send("Hello World".getBytes(StandardCharsets.UTF_8));
 
-    TimeUnit.MILLISECONDS.sleep(1);
+    TimeUnit.MINUTES.sleep(1);
   }
 
 }
