@@ -6,10 +6,10 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.wamai</groupId>
-  <artifactId>gamecore</artifactId>
+  <artifactId>game-net</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>gamecore</name>
+  <name>game-net</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
@@ -19,14 +19,16 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <google.protobuf>3.9.1</google.protobuf>
+    <netty.version>4.1.29.Final</netty.version>
+    <commons-lang3.version>3.9</commons-lang3.version>
   </properties>
 
   <dependencies>
 
     <dependency>
       <groupId>io.netty</groupId>
-      <artifactId>netty-handler</artifactId>
-      <version>4.1.29.Final</version>
+      <artifactId>netty-all</artifactId>
+      <version>${netty.version}</version>
     </dependency>
 
     <!--核心log4j2jar包 -->
@@ -51,6 +53,13 @@
       <groupId>com.google.protobuf</groupId>
       <artifactId>protobuf-java</artifactId>
       <version>${google.protobuf}</version>
+    </dependency>
+
+    <!--lang3-->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${commons-lang3.version}</version>
     </dependency>
 
 
