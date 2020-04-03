@@ -11,7 +11,7 @@ import org.pj.common.NamedThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TcpServer {
+public class TcpServer implements AutoCloseable {
 
   private final int port;
   private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -41,5 +41,11 @@ public class TcpServer {
     bootstrap.bind(port).sync().await();
 
     logger.info("Tcp server, start at:{}", port);
+  }
+
+  @Override
+  public void close() {
+    bootstrap.config().group().shutdownGracefully();
+    bootstrap.config().childGroup().shutdownGracefully();
   }
 }
