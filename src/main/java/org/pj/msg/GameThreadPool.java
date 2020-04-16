@@ -5,19 +5,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.pj.common.NamedThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GameThreadPool {
 
   private static final int MIN_SIZE = 4;
   private static final int MAX_SIZE = 8;
 
+  /** 线程池上限 */
   private final int limit;
+  /** 线程池 */
   private final ExecutorService[] pools;
+  /** 获取统计 */
   private final Map<Integer, Long> hashStat;
-
-  private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   public GameThreadPool() {
     this(Runtime.getRuntime().availableProcessors(), new NamedThreadFactory("game-thread"));
