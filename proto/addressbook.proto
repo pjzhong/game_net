@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package msg;
+
+option java_package = "org.pj.msg";
+option java_outer_classname = "AddressBookProto";
+
+import "person.proto";
+
+message AddressBook {
+    repeated Person people = 1;
+}

@@ -10,8 +10,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class NamedThreadFactory implements ThreadFactory {
 
-  private ThreadGroup threadGroup;
-
   private String groupName;
 
   private final boolean daemo;
@@ -30,7 +28,8 @@ public class NamedThreadFactory implements ThreadFactory {
   @Override
   public Thread newThread(Runnable r) {
     String name = getNextThreadName();
-    Thread ret = new Thread(threadGroup, r, name, 0);
+    Thread ret = new Thread(r);
+    ret.setName(name);
     ret.setDaemon(daemo);
     return ret;
   }

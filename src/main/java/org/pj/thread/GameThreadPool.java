@@ -1,12 +1,10 @@
-package org.pj.msg;
+package org.pj.thread;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.pj.common.NamedThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GameThreadPool {
 
@@ -16,8 +14,6 @@ public class GameThreadPool {
   private final int limit;
   private final ExecutorService[] pools;
   private final Map<Integer, Long> hashStat;
-
-  private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   public GameThreadPool() {
     this(Runtime.getRuntime().availableProcessors(), new NamedThreadFactory("game-thread"));
