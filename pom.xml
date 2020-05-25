@@ -23,9 +23,30 @@
     <commons-lang3.version>3.9</commons-lang3.version>
     <log4j.version>2.13.1</log4j.version>
     <slf4j.verion>2.11.0</slf4j.verion>
+    <spring.version>5.2.6.RELEASE</spring.version>
+    <spring.mongodb.version>2.2.7.RELEASE</spring.mongodb.version>
+    <mongodb.driver.version>3.12.4</mongodb.driver.version>
   </properties>
 
   <dependencies>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-mongodb</artifactId>
+      <version>${spring.mongodb.version}</version>
+    </dependency>
+
+<!--    <dependency>
+      <groupId>org.mongodb</groupId>
+      <artifactId>mongo-java-driver</artifactId>
+      <version>${mongodb.driver.version}</version>
+    </dependency>-->
 
     <dependency>
       <groupId>io.netty</groupId>
