@@ -3,6 +3,7 @@ package org.pj.module.conf;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -25,7 +26,6 @@ public class ConfigBuilderUtils {
    * @since 2020年05月27日 11:08:07
    **/
   public static <T> T autowired(Properties properties, Class<T> clazz) throws Exception {
-    T instance = clazz.getDeclaredConstructor().newInstance();
     Field[] allFields = clazz.getDeclaredFields();
     Field[] allPubFields = clazz.getFields();
 
@@ -33,7 +33,20 @@ public class ConfigBuilderUtils {
     fieldSet.addAll(Arrays.asList(allFields));
     fieldSet.addAll(Arrays.asList(allPubFields));
 
-    for (Field f : fieldSet) {
+    return autowired(properties, clazz, fieldSet);
+  }
+
+  /**
+   * 使用 {@code properties} 的来填充配置
+   *
+   * @param fields 填充的字段
+   * @author ZJP
+   * @since 2020年05月27日 11:08:07
+   **/
+  public static <T> T autowired(Properties properties, Class<T> clazz, Collection<Field> fields)
+      throws Exception {
+    T instance = clazz.getDeclaredConstructor().newInstance();
+    for (Field f : fields) {
       f.setAccessible(true);
       Config conf = f.getAnnotation(Config.class);
       if (conf != null) {
@@ -42,7 +55,7 @@ public class ConfigBuilderUtils {
         } catch (Exception e) {
           throw new RuntimeException(String
               .format("字段:%s.%s,数值:%s, 错误:%s", clazz.getName(), f.getName(),
-                  properties.get(f.getName()), e.getMessage()));
+                  properties.get(f.getName()), e.getMessage()), e);
         }
       }
     }
@@ -51,8 +64,7 @@ public class ConfigBuilderUtils {
   }
 
   public static <T> void setValue(Properties properties, Class<T> clazz, T instance,
-      Field field,
-      Config conf) throws Exception {
+      Field field, Config conf) throws Exception {
 
     String alias = conf.alias();
     String finalName = StringUtils.isBlank(alias) ? field.getName() : alias;
@@ -62,13 +74,11 @@ public class ConfigBuilderUtils {
       propValue = properties.getProperty(finalName.toLowerCase());
     }
     if (StringUtils.isBlank(propValue)) {
-      if (conf.allowNull()) {
-        return;
+      if (!conf.allowNull() && StringUtils.isBlank(conf.parser())) {
+        throw new RuntimeException(
+            String.format("class:%s.%s Required none null", clazz.getName(), field
+                .getName()));
       }
-
-      throw new RuntimeException(
-          String.format("class:%s Required none null", clazz.getName() + field
-              .getName()));
     }
 
     Class<?> type = ClassUtils.primitiveToWrapper(field.getType());
@@ -106,8 +116,7 @@ public class ConfigBuilderUtils {
   }
 
   private static Object parserMethod(Object instance, String parser, Class<?> parseClass,
-      String propValue)
-      throws Exception {
+      String propValue) throws Exception {
     Method method = parseClass.getDeclaredMethod(parser, String.class);
     method.setAccessible(true);
     Object result = null;

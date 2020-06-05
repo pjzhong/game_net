@@ -1,4 +1,4 @@
-package org.pj;
+package org.pj.module.config;
 
 import java.util.Properties;
 import org.junit.Assert;
@@ -40,6 +40,11 @@ public class ConfigTest {
 
     Assert.assertEquals(config.getTwo(), 2);
     Assert.assertEquals(config.getThree(), 3);
+  }
+
+  @Test
+  public void avaConfigTest() {
+
   }
 
   public static class SimpleConfig {

@@ -16,12 +16,19 @@ import org.apache.commons.lang3.ObjectUtils.Null;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Config {
 
+  /** 字段别名 */
   String alias() default "";
 
+  /** 内容解析器方法 */
   String parser() default "";
 
+  /** 内容解析类 */
   Class<?> parserClass() default Null.class;
 
+  /** 配置主键 */
+  String getKey() default "";
+
+  /** 能否为空 */
   boolean allowNull() default false;
 
 }

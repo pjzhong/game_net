@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Documented
-public @interface Table {
+public @interface ConfigTable {
 
   /** 表名 */
   String value() default "";
