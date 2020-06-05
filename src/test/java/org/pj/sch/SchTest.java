@@ -14,7 +14,7 @@ public class SchTest {
   @Test
   public void interval() throws InterruptedException {
     ScheduleManager manager = new ScheduleManager();
-    int stop = 10;
+    int stop = 1;
     AtomicInteger integer = new AtomicInteger();
     manager.schedule(
         new SimpleTrigger("interval", System.currentTimeMillis(), TimeUnit.SECONDS.toMillis(1),
@@ -28,8 +28,8 @@ public class SchTest {
   @Test
   public void timeOut() throws InterruptedException {
     ScheduleManager manager = new ScheduleManager();
-    int stop = 10;
-    int delay = 5;
+    int stop = 2;
+    int delay = 1;
     AtomicInteger integer = new AtomicInteger();
     manager.schedule(
         new SimpleTrigger("interval",
@@ -47,9 +47,9 @@ public class SchTest {
     AtomicInteger integer = new AtomicInteger();
     manager.schedule(
         new SimpleTrigger("interval", System.currentTimeMillis(),
-            repeat, TimeUnit.SECONDS.toMillis(2), integer::incrementAndGet));
+            repeat, TimeUnit.SECONDS.toMillis(repeat), integer::incrementAndGet));
 
-    TimeUnit.SECONDS.sleep(11);
+    TimeUnit.SECONDS.sleep(repeat * repeat);
 
     Assert.assertEquals(integer.intValue(), repeat);
   }
