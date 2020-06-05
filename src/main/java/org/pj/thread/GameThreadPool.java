@@ -11,8 +11,11 @@ public class GameThreadPool {
   private static final int MIN_SIZE = 4;
   private static final int MAX_SIZE = 8;
 
+  /** 线程池上限 */
   private final int limit;
+  /** 线程池 */
   private final ExecutorService[] pools;
+  /** 获取统计 */
   private final Map<Integer, Long> hashStat;
 
   public GameThreadPool() {
