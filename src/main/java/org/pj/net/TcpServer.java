@@ -1,7 +1,7 @@
 package org.pj.net;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -22,9 +22,9 @@ public class TcpServer implements AutoCloseable {
     this.port = port;
   }
 
-  public void startUp(ChannelInitializer initializer) throws Exception {
+  public void startUp(ChannelHandler initializer) throws Exception {
     bootstrap = new ServerBootstrap();
-    NioEventLoopGroup boss = new NioEventLoopGroup(0, new NamedThreadFactory("netty-boss"));
+    NioEventLoopGroup boss = new NioEventLoopGroup(1, new NamedThreadFactory("netty-boss"));
     NioEventLoopGroup worker = new NioEventLoopGroup(0, new NamedThreadFactory("netty-worker"));
 
     bootstrap.group(boss, worker);
@@ -34,9 +34,8 @@ public class TcpServer implements AutoCloseable {
     bootstrap.childOption(ChannelOption.SO_RCVBUF, 128 * 1024);
     bootstrap.childOption(ChannelOption.SO_SNDBUF, 128 * 1024);
 
-    bootstrap.handler(new LoggingHandler(LogLevel.DEBUG));
+    bootstrap.handler(new LoggingHandler(LogLevel.INFO));
     bootstrap.childHandler(initializer);
-
 
     bootstrap.bind(port).sync().await();
 

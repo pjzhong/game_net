@@ -25,7 +25,8 @@ public class AppConfig {
     config.setDriverClassName("com.mysql.jdbc.Driver");
     config.setMaximumPoolSize(50);
     config.setMinimumIdle(0);
-    config.setConnectionInitSql("select 1");
+    config.setConnectionTestQuery("select 1");
+    config.setPoolName("configDataSource");
     return new HikariDataSource(config);
   }
 

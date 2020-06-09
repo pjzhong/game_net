@@ -26,7 +26,12 @@ public class TcpServerTest {
     server.startUp(new WebSocketHandler(new SimpleChannelInboundHandler<ByteBuf>() {
       @Override
       protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
-        ctx.writeAndFlush(msg.retain());
+        ctx.write(msg.retain());
+      }
+
+      @Override
+      public void channelReadComplete(ChannelHandlerContext ctx) {
+        ctx.flush();
       }
     }));
 

@@ -102,14 +102,6 @@
       <version>${commons-lang3.version}</version>
     </dependency>
 
-
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.4</version>
-      <scope>provided</scope>
-    </dependency>
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -148,8 +140,8 @@
   </dependencies>
 
   <build>
-    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
+        <!--resource process -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
@@ -157,16 +149,102 @@
           <configuration>
             <encoding>UTF-8</encoding>
           </configuration>
+          <executions>
+            <execution>
+              <id>copy-resources</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${basedir}/target/release</outputDirectory>
+                <resources>
+                  <!-- 过滤config并输出到target目录下 -->
+                  <resource>
+                    <directory>src/main/resources</directory>
+                    <filtering>true</filtering>
+                  </resource>
+                </resources>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <!-- 输出依赖的jar包 -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <version>3.0.0</version>
+          <executions>
+            <execution>
+              <id>copy-dependencies-runtime</id>
+              <phase>package</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}/release/lib</outputDirectory>
+                <overWriteReleases>false</overWriteReleases>
+                <overWriteSnapshots>false</overWriteSnapshots>
+                <overWriteIfNewer>true</overWriteIfNewer>
+                <includeScope>runtime</includeScope>
+                <!--依赖传递-->
+                <excludeTransitive>false</excludeTransitive>
+              </configuration>
+            </execution>
+            <execution>
+              <id>copy-dependencies-system</id>
+              <phase>prepare-package</phase>
+              <goals>
+                <goal>copy-dependencies</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}/release/lib</outputDirectory>
+                <overWriteReleases>false</overWriteReleases>
+                <overWriteSnapshots>false</overWriteSnapshots>
+                <overWriteIfNewer>true</overWriteIfNewer>
+                <includeScope>system</includeScope>
+                <!--过滤依赖传递-->
+                <excludeTransitive>true</excludeTransitive>
+              </configuration>
+            </execution>
+          </executions>
+
+        </plugin>
+        <!-- 打成可运行jar包 -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.1.0</version>
+          <configuration>
+            <excludes>
+              <exclude>**/*.jar</exclude>
+              <exclude>**/*.properties</exclude>
+              <exclude>**/*.sql</exclude>
+              <exclude>**/*.xml</exclude>
+              <exclude>**/*.css</exclude>
+              <exclude>**/*.js</exclude>
+              <exclude>**/*.jsp</exclude>
+              <exclude>**/*.tld</exclude>
+              <exclude>**/*.txt</exclude>
+              <exclude>**/*.groovy</exclude>
+            </excludes>
+            <outputDirectory>${project.build.directory}/release</outputDirectory>
+            <archive>
+              <manifest>
+                <addClasspath>true</addClasspath>
+                <classpathPrefix>lib/</classpathPrefix>
+                <mainClass>org.pj.boot.GameBootMain</mainClass>
+              </manifest>
+              <manifestEntries>
+                <Class-Path>.</Class-Path>
+              </manifestEntries>
+            </archive>
+          </configuration>
         </plugin>
 
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.0.0</version>
-        </plugin>
-        <!-- see http://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <version>3.0.2</version>
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
@@ -180,6 +258,5 @@
           </configuration>
         </plugin>
       </plugins>
-    </pluginManagement>
   </build>
 </project>
