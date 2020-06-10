@@ -1,14 +1,12 @@
 @echo off
 
-set SOURCE_FOLDER=./
-
+set DIR=./
 set JAVA_TARGET_PATH=..\src\main\java
 
 @echo off
-for %%i in (*.proto) do (
-    protoc -I=%SOURCE_FOLDER% --java_out=%JAVA_TARGET_PATH% %%i
+
+for /R %DIR% %%i in (*.proto) do (
+    protoc -I=%%~di%%~pi --java_out=%JAVA_TARGET_PATH% %%i
     echo From %%i To %%~ni.java Successfully!
 )
-
 pause
-

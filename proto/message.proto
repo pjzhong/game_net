@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package msg;
+
+option java_package = "org.pj.msg";
+option java_outer_classname = "MessageProto";
+
+message Message {
+  /******************* 头部 ***************************/
+  /* 版本 */
+  fixed32 version = 1;
+  /* 模块 */
+  fixed32 module = 2;
+  /* 状态 */
+  fixed32 stat = 3;
+  /* 序号 */
+  fixed32 serial = 4;
+  /******************* 头部结束 ***************************/
+  /* 内容 */
+  bytes body = 15;
+}

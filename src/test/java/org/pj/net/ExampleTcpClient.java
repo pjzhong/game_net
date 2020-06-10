@@ -1,19 +1,14 @@
 package org.pj.net;
 
+import com.google.protobuf.MessageLite;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
-import io.netty.handler.flush.FlushConsolidationHandler;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -39,7 +34,13 @@ public class ExampleTcpClient {
   public void sendMsg(String msg) {
     ByteBuf buf = channel.alloc().buffer();
     buf.writeBytes(msg.getBytes(StandardCharsets.UTF_8));
-    channel.writeAndFlush(buf);
+    channel.writeAndFlush(buf, channel.voidPromise());
+  }
+
+  public void sendMsg(MessageLite packet) {
+    ByteBuf buf = channel.alloc().buffer();
+    buf.writeBytes(packet.toByteArray());
+    channel.writeAndFlush(buf, channel.voidPromise());
   }
 
   private void initBootstrap() throws InterruptedException {
@@ -57,32 +58,5 @@ public class ExampleTcpClient {
 
     channel = bootstrap.connect(host, port).sync().channel();
   }
-
-  /**
-   * @author zhongjp
-   * @since 2018/7/6
-   */
-  public static class ChatClientInitializer extends ChannelInitializer<SocketChannel> {
-
-    private ChannelHandler handler;
-
-    public ChatClientInitializer(ChannelHandler handler) {
-      this.handler = handler;
-    }
-
-    @Override
-    protected void initChannel(SocketChannel ch) throws Exception {
-      ChannelPipeline pipeline = ch.pipeline();
-      int maxLength = 1024 * 1024;
-      int lengthField = 4;
-      int offset = 0;
-      pipeline.addLast(new FlushConsolidationHandler());
-      pipeline.addLast(new LengthFieldPrepender(lengthField));
-      pipeline.addLast(
-          new LengthFieldBasedFrameDecoder(maxLength, offset, lengthField, 0, lengthField));
-      pipeline.addLast(handler);
-    }
-  }
-
 
 }
