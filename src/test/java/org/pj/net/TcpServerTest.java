@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 import org.java_websocket.client.WebSocketClient;
 import org.junit.Assert;
 import org.junit.Test;
-import org.pj.msg.MessageProto.Message;
+import org.pj.msg.proto.MessageProto.Message;
 import org.pj.net.init.SocketHandler;
 import org.pj.net.init.WebSocketHandler;
 
@@ -28,10 +28,10 @@ public class TcpServerTest {
         .setBody(ByteString.copyFromUtf8("Hello, WebSocket World!!!!")).build();
 
     TcpServer server = new TcpServer(8080);
-    server.startUp(new WebSocketHandler(new SimpleChannelInboundHandler<ByteBuf>() {
+    server.startUp(new WebSocketHandler(new SimpleChannelInboundHandler<Message>() {
       @Override
-      protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
-        ctx.write(msg.retain());
+      protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
+        ctx.write(msg);
       }
 
       @Override

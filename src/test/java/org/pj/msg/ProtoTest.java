@@ -5,7 +5,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
-import org.pj.msg.MessageProto.Message;
+import org.pj.msg.proto.MessageProto.Message;
 
 public class ProtoTest {
 
