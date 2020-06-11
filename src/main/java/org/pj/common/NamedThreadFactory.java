@@ -41,7 +41,7 @@ public class NamedThreadFactory implements ThreadFactory {
   }
 
   private String getNextThreadName() {
-    return this.groupName + "-thread-" + this.idGenerator.getAndIncrement();
+    return this.groupName + "-" + this.idGenerator.getAndIncrement();
   }
 
 }

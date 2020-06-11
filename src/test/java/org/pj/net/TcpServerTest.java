@@ -2,7 +2,6 @@ package org.pj.net;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import java.net.URI;
@@ -12,8 +11,8 @@ import java.util.concurrent.TimeUnit;
 import org.java_websocket.client.WebSocketClient;
 import org.junit.Assert;
 import org.junit.Test;
-import org.pj.msg.proto.MessageProto.Message;
-import org.pj.net.init.SocketHandler;
+import org.pj.msg.MessageProto.Message;
+import org.pj.net.init.ProtobufSocketHandler;
 import org.pj.net.init.WebSocketHandler;
 
 public class TcpServerTest {
@@ -56,7 +55,7 @@ public class TcpServerTest {
     client.connectBlocking();
     client.send(message.toByteArray());
 
-    boolean suc = latch.await(1, TimeUnit.MINUTES);
+    boolean suc = latch.await(1, TimeUnit.SECONDS);
     server.close();
 
     Assert.assertTrue("Echo Failed", suc);
@@ -72,10 +71,10 @@ public class TcpServerTest {
         .setBody(ByteString.copyFromUtf8("Hello, Socket World!!!!")).build();
 
     TcpServer server = new TcpServer(8080);
-    server.startUp(new SocketHandler(new SimpleChannelInboundHandler<ByteBuf>() {
+    server.startUp(new ProtobufSocketHandler(new SimpleChannelInboundHandler<Message>() {
       @Override
-      protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
-        ctx.write(msg.retain());
+      protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
+        ctx.write(msg);
       }
 
       public void channelReadComplete(ChannelHandlerContext ctx) {
@@ -86,15 +85,12 @@ public class TcpServerTest {
     int loop = 5;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleTcpClient client = new ExampleTcpClient("localhost", 8080,
-        new SocketHandler(new SimpleChannelInboundHandler<ByteBuf>() {
+        new ProtobufSocketHandler(new SimpleChannelInboundHandler<Message>() {
           @Override
-          public void channelRead0(ChannelHandlerContext ctx, ByteBuf msg)
-              throws Exception {
-            Message echoMessage = Message.parseFrom(msg.nioBuffer());
-            System.out.println(echoMessage.getBody().toStringUtf8());
+          public void channelRead0(ChannelHandlerContext ctx, Message msg) {
+            System.out.println(msg.getBody().toStringUtf8());
+            Assert.assertEquals(message, msg);
             latch.countDown();
-
-            Assert.assertEquals(message, echoMessage);
           }
         }));
 
@@ -102,7 +98,7 @@ public class TcpServerTest {
       client.sendMsg(message);
     }
 
-    boolean suc = latch.await(1, TimeUnit.MINUTES);
+    boolean suc = latch.await(1, TimeUnit.SECONDS);
     server.close();
 
     Assert.assertTrue("Echo Failed", suc);

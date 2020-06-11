@@ -7,15 +7,18 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.flush.FlushConsolidationHandler;
+import org.pj.net.handler.ProtoBufCodec;
 
-public class SocketHandler extends ChannelInitializer {
+public class ProtobufSocketHandler extends ChannelInitializer {
 
   private ChannelHandler handler;
   private LengthFieldPrepender lengthFieldPrepender;
+  private ProtoBufCodec protoBufCodec;
 
-  public SocketHandler(ChannelHandler handler) {
+  public ProtobufSocketHandler(ChannelHandler handler) {
     this.handler = handler;
-    lengthFieldPrepender = new LengthFieldPrepender(Short.BYTES);
+    this.lengthFieldPrepender = new LengthFieldPrepender(Short.BYTES);
+    this.protoBufCodec = new ProtoBufCodec();
   }
 
   @Override
@@ -25,6 +28,7 @@ public class SocketHandler extends ChannelInitializer {
     pip.addLast(lengthFieldPrepender);
     pip.addLast(new LengthFieldBasedFrameDecoder(Short.MAX_VALUE, 0, Short.BYTES, 0,
         Short.BYTES));
+    pip.addLast(protoBufCodec);
     pip.addLast(handler);
   }
 }

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package msg;
+
+option java_package = "org.pj.protocols.hello";
+option java_outer_classname = "HelloWorldProto";
+
+message HelloWorld {
+
+  string str = 1;
+}

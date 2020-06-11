@@ -10,6 +10,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import java.nio.charset.StandardCharsets;
+import org.pj.common.NamedThreadFactory;
 
 /**
  * @author zhongjp
@@ -44,7 +45,7 @@ public class ExampleTcpClient {
   }
 
   private void initBootstrap() throws InterruptedException {
-    EventLoopGroup loopGroup = new NioEventLoopGroup(4);
+    EventLoopGroup loopGroup = new NioEventLoopGroup(4, new NamedThreadFactory("Tcp_client"));
     bootstrap = new Bootstrap()
         .group(loopGroup)
         .channel(NioSocketChannel.class)

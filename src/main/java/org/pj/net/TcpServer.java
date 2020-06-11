@@ -22,10 +22,11 @@ public class TcpServer implements AutoCloseable {
     this.port = port;
   }
 
-  public void startUp(ChannelHandler initializer) throws Exception {
+  public void startUp(ChannelHandler handler) throws Exception {
     bootstrap = new ServerBootstrap();
-    NioEventLoopGroup boss = new NioEventLoopGroup(1, new NamedThreadFactory("netty-boss"));
-    NioEventLoopGroup worker = new NioEventLoopGroup(0, new NamedThreadFactory("netty-worker"));
+    NioEventLoopGroup boss = new NioEventLoopGroup(1, new NamedThreadFactory("svr-boss"));
+    NioEventLoopGroup worker = new NioEventLoopGroup(0,
+        new NamedThreadFactory("svr-worker"));
 
     bootstrap.group(boss, worker);
     bootstrap.channel(NioServerSocketChannel.class);
@@ -35,7 +36,7 @@ public class TcpServer implements AutoCloseable {
     bootstrap.childOption(ChannelOption.SO_SNDBUF, 128 * 1024);
 
     bootstrap.handler(new LoggingHandler(LogLevel.INFO));
-    bootstrap.childHandler(initializer);
+    bootstrap.childHandler(handler);
 
     bootstrap.bind(port).sync().await();
 

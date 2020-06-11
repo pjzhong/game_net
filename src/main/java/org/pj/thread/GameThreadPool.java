@@ -4,12 +4,17 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.pj.common.NamedThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GameThreadPool {
 
   private static final int MIN_SIZE = 4;
   private static final int MAX_SIZE = 8;
+
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   /** 线程池上限 */
   private final int limit;
@@ -56,5 +61,14 @@ public class GameThreadPool {
 
   public Map<Integer, Long> getHashStat() {
     return hashStat;
+  }
+
+  public void shutdown() throws InterruptedException {
+    for (ExecutorService e : pools) {
+      e.shutdown();
+      e.awaitTermination(MAX_SIZE, TimeUnit.SECONDS);
+      logger.info("{} isShutdown", e, e.isShutdown());
+      e.shutdownNow();
+    }
   }
 }

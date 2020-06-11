@@ -6,7 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import java.util.List;
-import org.pj.msg.proto.MessageProto.Message;
+import org.pj.msg.MessageProto.Message;
 
 /**
  * SimpleDecoder

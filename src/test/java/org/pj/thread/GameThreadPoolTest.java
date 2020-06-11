@@ -1,4 +1,4 @@
-package org.pj.msg;
+package org.pj.thread;
 
 import io.netty.channel.ChannelId;
 import io.netty.channel.DefaultChannelId;
@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import org.junit.Test;
-import org.pj.thread.GameThreadPool;
 
 public class GameThreadPoolTest {
 

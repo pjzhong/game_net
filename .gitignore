@@ -43,4 +43,4 @@ target/
 
 # custom #
 logs/
-/src/main/java/org/pj/msg/proto
+*Proto.java
