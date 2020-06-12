@@ -9,19 +9,27 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.flush.FlushConsolidationHandler;
+import java.util.ArrayList;
+import java.util.List;
 import org.pj.core.net.handler.WebSocketDecoder;
 import org.pj.core.net.handler.WebSocketEncoder;
 
-public class WebSocketHandler extends ChannelInitializer {
+public class WebSocketHandlerInitializer extends ChannelInitializer {
 
-  private ChannelHandler handler;
+  private List<ChannelHandler> handlers;
   private WebSocketDecoder webSocketDecoder;
   private WebSocketEncoder webSocketEncoder;
 
-  public WebSocketHandler(ChannelHandler handler) {
-    this.handler = handler;
+  public WebSocketHandlerInitializer(ChannelHandler handler) {
+    this.handlers = new ArrayList<>();
+    handlers.add(handler);
     this.webSocketDecoder = new WebSocketDecoder();
     this.webSocketEncoder = new WebSocketEncoder();
+  }
+
+  public WebSocketHandlerInitializer addHandler(ChannelHandler handler) {
+    handlers.add(handler);
+    return this;
   }
 
   @Override
@@ -35,8 +43,8 @@ public class WebSocketHandler extends ChannelInitializer {
     pip.addLast(new WebSocketServerProtocolHandler("/"));
     pip.addLast(webSocketDecoder);
     pip.addLast(webSocketEncoder);
-    //TODO My Message Decoder
-    pip.addLast(handler);//TODO MY Message Handler
-
+    for (ChannelHandler handler : handlers) {
+      pip.addLast(handler);
+    }
   }
 }

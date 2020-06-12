@@ -18,7 +18,13 @@ public @interface Config {
   /** 字段别名 */
   String alias() default "";
 
-  /** 内容解析器方法 */
+  /**
+   * 内容解析器
+   *
+   * 如果有内容解析器，allowNull将失效，请自行处理空值情况
+   *
+   * @since 2020年06月12日 14:58:48
+   */
   String parser() default "";
 
   /** 内容解析类 */

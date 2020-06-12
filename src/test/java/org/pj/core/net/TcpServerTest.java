@@ -12,8 +12,8 @@ import org.java_websocket.client.WebSocketClient;
 import org.junit.Assert;
 import org.junit.Test;
 import org.pj.core.msg.MessageProto.Message;
-import org.pj.core.net.init.ProtobufSocketHandler;
-import org.pj.core.net.init.WebSocketHandler;
+import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
+import org.pj.core.net.init.WebSocketHandlerInitializer;
 
 public class TcpServerTest {
 
@@ -27,7 +27,7 @@ public class TcpServerTest {
         .setBody(ByteString.copyFromUtf8("Hello, WebSocket World!!!!")).build();
 
     TcpServer server = new TcpServer(8080);
-    server.startUp(new WebSocketHandler(new SimpleChannelInboundHandler<Message>() {
+    server.startUp(new WebSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
       @Override
       protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
         ctx.write(msg);
@@ -71,7 +71,7 @@ public class TcpServerTest {
         .setBody(ByteString.copyFromUtf8("Hello, Socket World!!!!")).build();
 
     TcpServer server = new TcpServer(8080);
-    server.startUp(new ProtobufSocketHandler(new SimpleChannelInboundHandler<Message>() {
+    server.startUp(new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
       @Override
       protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
         ctx.write(msg);
@@ -85,7 +85,7 @@ public class TcpServerTest {
     int loop = 5;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleTcpClient client = new ExampleTcpClient("localhost", 8080,
-        new ProtobufSocketHandler(new SimpleChannelInboundHandler<Message>() {
+        new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
           @Override
           public void channelRead0(ChannelHandlerContext ctx, Message msg) {
             System.out.println(msg.getBody().toStringUtf8());

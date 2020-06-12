@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pj.boot.AppConfig;
+import org.pj.boot.ServerConfig;
 import org.pj.module.avatar.conf.AvatarConfig;
 import org.pj.module.avatar.conf.AvatarInit;
 import org.pj.module.avatar.conf.LevelUp;
@@ -19,14 +19,14 @@ public class AvatarSystemTest {
 
   @BeforeClass
   public static void init() {
-    context = new AnnotationConfigApplicationContext(AppConfig.class);
+    context = new AnnotationConfigApplicationContext(ServerConfig.class);
   }
 
   @Test
   public void configTest() throws Exception {
     AvatarConfig config = AvatarConfig.getInstance();
     ConfigSystem configSystem = context.getBean(ConfigSystem.class);
-    config.load(configSystem.builder("avatar"));
+    config.load(configSystem.builderWithPrefix("avatar"));
 
     Assert.assertNotNull(AvatarInit.realNameGift);
     System.out.println(AvatarInit.realNameGift);

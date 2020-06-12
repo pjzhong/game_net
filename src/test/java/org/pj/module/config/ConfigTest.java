@@ -4,24 +4,26 @@ import java.util.Properties;
 import org.junit.Assert;
 import org.junit.Test;
 import org.pj.module.conf.Config;
-import org.pj.module.conf.ConfigBuilderUtils;
+import org.pj.module.conf.ConfigSystem.ConfigBuilder;
 
 public class ConfigTest {
 
   @Test(expected = RuntimeException.class)
   public void noneNullTest() throws Exception {
-    ConfigBuilderUtils.autowired(new Properties(), SimpleConfig.class);
+    ConfigBuilder builder = new ConfigBuilder();
+    builder.autowired(new Properties(), SimpleConfig.class);
   }
 
   @Test
   public void simpleTest() throws Exception {
+    ConfigBuilder builder = new ConfigBuilder();
     Properties properties = new Properties();
     properties.put("string", "1");
     properties.put("i", "1");
     properties.put("integer", "1");
     properties.put("dd", "1");
     properties.put("aDouble", "1");
-    SimpleConfig config = ConfigBuilderUtils.autowired(properties, SimpleConfig.class);
+    SimpleConfig config = builder.autowired(properties, SimpleConfig.class);
 
     Assert.assertNull(config.getNullString());
     Assert.assertEquals(config.getString(), "1");
@@ -33,10 +35,11 @@ public class ConfigTest {
 
   @Test
   public void parserTest() throws Exception {
+    ConfigBuilder builder = new ConfigBuilder();
     Properties properties = new Properties();
     properties.put("two", "1");
     properties.put("three", "1");
-    SimpleParser config = ConfigBuilderUtils.autowired(properties, SimpleParser.class);
+    SimpleParser config = builder.autowired(properties, SimpleParser.class);
 
     Assert.assertEquals(config.getTwo(), 2);
     Assert.assertEquals(config.getThree(), 3);

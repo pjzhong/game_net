@@ -18,7 +18,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @Configuration
 @PropertySource("classpath:/server.properties")
 @ComponentScan("org.pj.module")
-public class AppConfig {
+public class ServerConfig {
 
   @Bean(value = "configDataSource", destroyMethod = "close")
   public HikariDataSource configDataSource(Environment env) {

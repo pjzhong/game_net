@@ -6,7 +6,7 @@ public class GameBootMain {
 
   public static void main(String[] argc) {
     AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
-        AppConfig.class);
+        ServerConfig.class);
     ctx.registerShutdownHook();
   }
 

@@ -10,7 +10,7 @@ public class BootConfigTest {
 
   @Test
   public void test() {
-    ApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
+    ApplicationContext context = new AnnotationConfigApplicationContext(ServerConfig.class);
 
     JdbcTemplate template = context.getBean("configDao", JdbcTemplate.class);
     SqlRowSet set = template.queryForRowSet("SELECT * FROM item_item WHERE  1 = ?", 1);

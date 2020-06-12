@@ -2,7 +2,6 @@ package org.pj.core.msg;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import java.util.concurrent.CountDownLatch;
@@ -15,7 +14,8 @@ import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.ExampleTcpClient;
 import org.pj.core.net.TcpServer;
 import org.pj.core.net.handler.MessageHandler;
-import org.pj.core.net.init.ProtobufSocketHandler;
+import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
+import org.pj.protocols.hello.HelloFacade;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
 
 public class MessageDispatcherTest {
@@ -28,11 +28,11 @@ public class MessageDispatcherTest {
     MessageDispatcher messageDispatcher = new MessageDispatcher(
         Runtime.getRuntime().availableProcessors());
 
-    messageDispatcher.registerHandler(new SimpleFacadeFacade());
+    messageDispatcher.registerHandler(new HelloFacade());
     Assert.assertFalse(messageDispatcher.getHandlers().isEmpty());
 
     TcpServer server = new TcpServer(8080);
-    server.startUp(new ProtobufSocketHandler(new MessageHandler(messageDispatcher)));
+    server.startUp(new ProtobufSocketHandlerInitializer(new MessageHandler(messageDispatcher)));
 
     tcpServer = server;
     dispatcher = messageDispatcher;
@@ -55,7 +55,7 @@ public class MessageDispatcherTest {
     int loop = 5;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleTcpClient client = new ExampleTcpClient("localhost", 8080,
-        new ProtobufSocketHandler(new SimpleChannelInboundHandler<Message>() {
+        new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
           @Override
           public void channelRead0(ChannelHandlerContext ctx, Message msg) {
             Assert.assertEquals("HelloWorld", msg.getBody().toStringUtf8());
@@ -79,7 +79,7 @@ public class MessageDispatcherTest {
     int loop = 5;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleTcpClient client = new ExampleTcpClient("localhost", 8080,
-        new ProtobufSocketHandler(new SimpleChannelInboundHandler<Message>() {
+        new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
           @Override
           public void channelRead0(ChannelHandlerContext ctx, Message msg) {
             Assert.assertEquals(request, msg);
@@ -105,7 +105,7 @@ public class MessageDispatcherTest {
     int loop = 1000;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleTcpClient client = new ExampleTcpClient("localhost", 8080,
-        new ProtobufSocketHandler(new SimpleChannelInboundHandler<Message>() {
+        new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
           @Override
           public void channelRead0(ChannelHandlerContext ctx, Message msg)
               throws InvalidProtocolBufferException {
@@ -123,30 +123,13 @@ public class MessageDispatcherTest {
     Assert.assertTrue("Echo Failed", latch.await(300, TimeUnit.MILLISECONDS));
   }
 
-  public static class SimpleFacadeFacade {
+  @Test(expected = IllegalArgumentException.class)
+  public void duplicatedRegister() {
+    MessageDispatcher messageDispatcher = new MessageDispatcher(
+        Runtime.getRuntime().availableProcessors());
 
-    @Packet(1)
-    public Message HelloWorld() {
-      return Message.newBuilder().setBody(ByteString.copyFromUtf8("HelloWorld")).build();
-    }
-
-
-    @Packet(2)
-    public Message echoContext(Channel channel, Message message) {
-      Assert.assertNotNull(channel);
-      return message;
-    }
-
-    @Packet(3)
-    public HelloWorld echoHelloWorld(Channel channel, HelloWorld world) {
-      Assert.assertNotNull(channel);
-      return world;
-    }
-
-    public HelloWorld noEffect(HelloWorld world) {
-      return world;
-    }
-
+    messageDispatcher.registerHandler(new HelloFacade());
+    messageDispatcher.registerHandler(new HelloFacade());
   }
 
 }

@@ -74,7 +74,12 @@ public class MessageDispatcher implements AutoCloseable {
         HandlerInfo info = new HandlerInfo(handler, m);
         parseParameter(m, info);
 
-        handlers.put(packet.value(), info);
+        boolean suc = handlers.putIfAbsent(packet.value(), info) == null;
+        if (!suc) {
+          throw new IllegalArgumentException(String
+              .format("duplicated handler register %s.%s#%s", clazz.getName(), m.getName(),
+                  packet.value()));
+        }
       }
     }
   }
