@@ -2,7 +2,7 @@ package org.pj.protocols.hello;
 
 
 import io.netty.channel.Channel;
-import org.pj.msg.Packet;
+import org.pj.core.msg.Packet;
 import org.pj.protocols.Facade;
 
 /**

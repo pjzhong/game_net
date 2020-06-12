@@ -9,6 +9,7 @@ import org.pj.boot.AppConfig;
 import org.pj.module.avatar.conf.AvatarConfig;
 import org.pj.module.avatar.conf.AvatarInit;
 import org.pj.module.avatar.conf.LevelUp;
+import org.pj.module.conf.ConfigSystem;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -24,7 +25,8 @@ public class AvatarSystemTest {
   @Test
   public void configTest() throws Exception {
     AvatarConfig config = AvatarConfig.getInstance();
-    config.load(context);
+    ConfigSystem configSystem = context.getBean(ConfigSystem.class);
+    config.load(configSystem.builder("avatar"));
 
     Assert.assertNotNull(AvatarInit.realNameGift);
     System.out.println(AvatarInit.realNameGift);

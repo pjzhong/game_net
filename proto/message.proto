@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package msg;
 
-option java_package = "org.pj.msg";
+option java_package = "org.pj.core.msg";
 option java_outer_classname = "MessageProto";
 
 message Message {
