@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.lang3.ObjectUtils.Null;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -85,7 +84,7 @@ public class ConfigBuilderUtils {
 
     if (!"".equals(conf.parser())) {
       Class<?> parseClass =
-          conf.parserClass() == Null.class ? instance.getClass() : conf.parserClass();
+          conf.parserClass() == Object.class ? instance.getClass() : conf.parserClass();
       field.set(instance, parserMethod(instance, conf.parser(), parseClass, propValue));
     } else if (type == Integer.class) {
       field.set(instance, Integer.parseInt(propValue));
