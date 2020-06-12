@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.pj.core.net.handler.ProtoBufCodec;
 
-public class ProtobufSocketHandlerInitializer extends ChannelInitializer {
+public class ProtobufSocketHandlerInitializer extends ChannelInitializer<Channel> {
 
   private LengthFieldPrepender lengthFieldPrepender;
   private ProtoBufCodec protoBufCodec;
@@ -23,6 +23,13 @@ public class ProtobufSocketHandlerInitializer extends ChannelInitializer {
     this.lengthFieldPrepender = new LengthFieldPrepender(Short.BYTES);
     this.protoBufCodec = new ProtoBufCodec();
   }
+
+  public ProtobufSocketHandlerInitializer(List<ChannelHandler> handlers) {
+    this.handlers = new ArrayList<>(handlers);
+    this.lengthFieldPrepender = new LengthFieldPrepender(Short.BYTES);
+    this.protoBufCodec = new ProtoBufCodec();
+  }
+
 
   public ProtobufSocketHandlerInitializer addHandler(ChannelHandler handler) {
     handlers.add(handler);

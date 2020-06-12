@@ -45,7 +45,7 @@ public class SimpleTrigger implements Trigger {
     Objects.requireNonNull(name);
     Objects.requireNonNull(task);
     if (start < 0 || start == Long.MAX_VALUE) {
-      throw new IllegalArgumentException("must be 0 <= start < Long.MAX_VALUE");
+      throw new IllegalArgumentException("must be 0 <= init < Long.MAX_VALUE");
     }
 
     this.name = name;

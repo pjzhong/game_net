@@ -1,6 +1,7 @@
 package org.pj.core.msg.adp;
 
 import com.google.protobuf.Parser;
+import java.lang.reflect.Parameter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.ArrayUtils;
@@ -56,11 +57,21 @@ public class ProtobufAdapter implements IAdapter<Object> {
   @Override
   public Object adapter(InvokeContext context, HandlerInfo info, int idx) throws Exception {
     ParameterInfo parameterInfo = info.getParameterInfos().get(idx);
-    Parser<?> parser = extractParser(parameterInfo.getParameter().getType());
-    Object result = null;
-    if (parser != null) {
-      result = parser.parseFrom(context.getMessage().getBody());
+    try {
+
+      Parser<?> parser = extractParser(parameterInfo.getParameter().getType());
+      Object result = null;
+      if (parser != null) {
+        result = parser.parseFrom(context.getMessage().getBody());
+      }
+      return result;
+    } catch (Exception e) {
+      Parameter p = parameterInfo.getParameter();
+      throw new IllegalArgumentException(
+          String
+              .format("parser protocol parameter %s#%s error", p.getType().getName(), p.getName()),
+          e);
     }
-    return result;
+
   }
 }

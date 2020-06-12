@@ -40,7 +40,7 @@ public class TcpServer implements AutoCloseable {
 
     bootstrap.bind(port).sync().await();
 
-    logger.info("Tcp server, start at:{}", port);
+    logger.info("Tcp server, init at:{}", port);
   }
 
   @Override

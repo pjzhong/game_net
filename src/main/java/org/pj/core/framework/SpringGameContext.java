@@ -1,12 +1,25 @@
 package org.pj.core.framework;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 import javax.annotation.Priority;
+import org.pj.core.msg.MessageDispatcher;
+import org.pj.core.net.TcpServer;
+import org.pj.core.net.handler.MessageHandler;
+import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
+import org.pj.core.net.init.WebSocketHandlerInitializer;
+import org.pj.protocols.Facade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -20,13 +33,29 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
   private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+  private Set<Channel> channels;
+  private MessageDispatcher dispatcher;
+  private TcpServer tcpServer;
   private GenericApplicationContext context;
+
+  public SpringGameContext(GenericApplicationContext ctx) {
+    channels = new ConcurrentSkipListSet<>();
+    context = ctx;
+  }
 
   public void setContext(GenericApplicationContext context) {
     this.context = context;
   }
 
-  public void start() {
+  public void setDispatcher(MessageDispatcher dispatcher) {
+    this.dispatcher = dispatcher;
+  }
+
+  public void setTcpServer(TcpServer tcpServer) {
+    this.tcpServer = tcpServer;
+  }
+
+  public void init() {
     initSystem();
   }
 
@@ -42,7 +71,14 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
     for (ISystem sys : systemList) {
       sys.init();
+      //TODO 注册事件监听
       logger.info("{} created", sys.getClass().getSimpleName());
+    }
+
+    //注册门面系统
+    Map<String, Object> facades = context.getBeansWithAnnotation(Facade.class);
+    for (Object obj : facades.values()) {
+      dispatcher.registerHandler(obj);
     }
 
     //TODO 触发全部系统初始完毕事件
@@ -60,15 +96,37 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     }
   }
 
+  public void start() throws Exception {
+    startTcpServer();
+  }
+
+  private void startTcpServer() throws Exception {
+    List<ChannelHandler> channelHandlers = new ArrayList<>();
+    channelHandlers.add(new ChannelCollector(channels));
+    channelHandlers.add(new MessageHandler(dispatcher));
+
+    boolean isSocket = context.getEnvironment().getProperty("game.isSocket", Boolean.class, false);
+    ChannelHandler handler;
+    if (isSocket) {
+      handler = new ProtobufSocketHandlerInitializer(channelHandlers);
+    } else {
+      handler = new WebSocketHandlerInitializer(channelHandlers);
+    }
+    tcpServer.startUp(handler);
+  }
+
   @Override
   public void close() throws Exception {
-
-    //TODO 断开所有链接
-    //TODO 关闭分发器
+    logger.info("shutdown All connections");
+    channels.forEach(Channel::close);
+    logger.info("shutdown dispatcher");
+    dispatcher.close();
+    logger.info("shutdown systems");
     destroySystems();
-    //TODO 关闭TCP服务器
+    logger.info("shutdown tcpServer");
+    tcpServer.close();
 
-    context.close();
+    logger.info("gameContext shutdown success");
   }
 
   private void destroySystems() {
@@ -80,6 +138,28 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
         logger.error(sys.getClass().getSimpleName() + " destroy error", e);
       }
     }
+  }
+
+  private static class ChannelCollector extends ChannelInboundHandlerAdapter {
+
+    private final Set<Channel> channels;
+
+    public ChannelCollector(Set<Channel> channels) {
+      this.channels = channels;
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) {
+      channels.add(ctx.channel());
+      ctx.fireChannelActive();
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) {
+      channels.remove(ctx.channel());
+      ctx.fireChannelInactive();
+    }
+
   }
 
   /*    Spring 代理方法            */
