@@ -3,12 +3,12 @@ package org.pj.core.event;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
-public class CallBack {
+public class Subscriber {
 
   private final Object target;
   private final Method method;
 
-  public CallBack(Object target, Method method) {
+  public Subscriber(Object target, Method method) {
     this.target = target;
     this.method = method;
   }
@@ -38,9 +38,9 @@ public class CallBack {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CallBack callBack = (CallBack) o;
-    return target.equals(callBack.target) &&
-        method.equals(callBack.method);
+    Subscriber listener = (Subscriber) o;
+    return target.equals(listener.target) &&
+        method.equals(listener.method);
   }
 
   @Override

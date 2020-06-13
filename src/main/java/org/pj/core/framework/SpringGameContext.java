@@ -12,8 +12,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.stream.Collectors;
 import javax.annotation.Priority;
+import org.pj.core.event.EventBus;
 import org.pj.core.msg.MessageDispatcher;
 import org.pj.core.net.TcpServer;
 import org.pj.core.net.handler.MessageHandler;
@@ -34,6 +39,8 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   private Set<Channel> channels;
+  private ExecutorService service;
+  private EventBus eventBus;
   private MessageDispatcher dispatcher;
   private TcpServer tcpServer;
   private GenericApplicationContext context;
@@ -41,6 +48,23 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   public SpringGameContext(GenericApplicationContext ctx) {
     channels = new ConcurrentSkipListSet<>();
     context = ctx;
+    service = workStrealingPool();
+  }
+
+  private ForkJoinPool workStrealingPool() {
+    final ForkJoinWorkerThreadFactory factory = pool -> {
+      final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory
+          .newThread(pool);
+      worker.setName("game-context-" + worker.getPoolIndex());
+      return worker;
+    };
+
+    return new ForkJoinPool
+        (Runtime.getRuntime().availableProcessors(), factory, null, true);
+  }
+
+  public void setEventBus(EventBus eventBus) {
+    this.eventBus = eventBus;
   }
 
   public void setContext(GenericApplicationContext context) {
@@ -71,7 +95,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
     for (ISystem sys : systemList) {
       sys.init();
-      //TODO 注册事件监听
+      eventBus.registerEvent(sys);
       logger.info("{} created", sys.getClass().getSimpleName());
     }
 
@@ -98,6 +122,8 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
   public void start() throws Exception {
     startTcpServer();
+
+    Runtime.getRuntime().removeShutdownHook(new Thread(this::close));
   }
 
   private void startTcpServer() throws Exception {
@@ -116,7 +142,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     logger.info("shutdown All connections");
     channels.forEach(Channel::close);
     logger.info("shutdown dispatcher");
@@ -126,6 +152,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     logger.info("shutdown tcpServer");
     tcpServer.close();
 
+    context.close();
     logger.info("gameContext shutdown success");
   }
 
@@ -159,7 +186,19 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
       channels.remove(ctx.channel());
       ctx.fireChannelInactive();
     }
+  }
 
+  /*    事件方法            */
+  public void fireEvent(int type, Object... params) {
+    eventBus.fireEvent(type, params);
+  }
+
+  public void asyncFireEvent(int type, Object... params) {
+    eventBus.asyncFireEvent(service, type, params);
+  }
+
+  public void asyncFireEvent(ExecutorService service, int type, Object... params) {
+    eventBus.asyncFireEvent(service, type, params);
   }
 
   /*    Spring 代理方法            */
