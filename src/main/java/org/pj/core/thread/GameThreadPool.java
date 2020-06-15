@@ -53,7 +53,7 @@ public class GameThreadPool {
    * @since 2020年04月02日 20:51:49
    */
   public ExecutorService getPool(Object o) {
-    int h = System.identityHashCode(o.hashCode());
+    int h = System.identityHashCode(o);
     int idx = (h ^ (h >>> 16)) & limit;
     hashStat.merge(idx, 1L, Long::sum);
     return pools[idx];

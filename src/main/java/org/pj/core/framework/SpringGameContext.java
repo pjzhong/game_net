@@ -152,7 +152,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     logger.info("shutdown tcpServer");
     tcpServer.close();
 
-    context.close();
     logger.info("gameContext shutdown success");
   }
 

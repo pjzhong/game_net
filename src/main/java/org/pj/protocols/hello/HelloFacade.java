@@ -8,6 +8,8 @@ import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.Packet;
 import org.pj.protocols.Facade;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Hello World
@@ -18,6 +20,8 @@ import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
 @Facade
 public class HelloFacade {
 
+
+  private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Packet(1)
   public Message HelloWorld() {
@@ -33,6 +37,7 @@ public class HelloFacade {
 
   @Packet(3)
   public HelloWorld echoHelloWorld(Channel channel, HelloWorld world) {
+    logger.info("from {} msg {}", channel.remoteAddress(), world.getStr());
     Objects.requireNonNull(channel);
     return world;
   }
