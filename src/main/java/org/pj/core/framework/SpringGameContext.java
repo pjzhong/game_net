@@ -18,6 +18,7 @@ import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
 import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.stream.Collectors;
 import javax.annotation.Priority;
+import org.apache.commons.lang3.ArrayUtils;
 import org.pj.core.event.EventBus;
 import org.pj.core.msg.MessageDispatcher;
 import org.pj.core.net.TcpServer;
@@ -188,15 +189,19 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   }
 
   /*    事件方法            */
+  public void fireEvent(int type) {
+    eventBus.fireEvent(type, ArrayUtils.EMPTY_OBJECT_ARRAY);
+  }
+
   public void fireEvent(int type, Object... params) {
     eventBus.fireEvent(type, params);
   }
 
-  public void asyncFireEvent(int type, Object... params) {
-    eventBus.asyncFireEvent(service, type, params);
+  public void asyncFireEvent(int type) {
+    eventBus.asyncFireEvent(service, type, ArrayUtils.EMPTY_OBJECT_ARRAY);
   }
 
-  public void asyncFireEvent(ExecutorService service, int type, Object... params) {
+  public void asyncFireEvent(int type, Object... params) {
     eventBus.asyncFireEvent(service, type, params);
   }
 
