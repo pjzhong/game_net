@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class EventTestSystem implements ISystem {
 
   private Logger logger = LoggerFactory.getLogger(this.getClass());
-  public int number = 0;
+  public volatile int number = 0;
 
   @Listen(100)
   public void init(int num) {
