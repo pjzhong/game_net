@@ -117,7 +117,7 @@ public class WebSocketMessageDispatcherTest {
         .setBody(world.toByteString())
         .build();
 
-    int loop = 1000;
+    int loop = 10;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleWebSocketClient client = newClient(msg -> {
       HelloWorld echoWorld = null;
@@ -145,7 +145,7 @@ public class WebSocketMessageDispatcherTest {
     Message request = Message.newBuilder().setModule(4)
         .build();
 
-    int size = 100, senders = 128, total = size * senders;
+    int size = 100, senders = 8, total = size * senders;
     CountDownLatch latch = new CountDownLatch(total);
     int[] result = new int[total + 1];
     ExampleWebSocketClient[] clients = new ExampleWebSocketClient[senders];

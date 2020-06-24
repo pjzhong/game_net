@@ -135,7 +135,7 @@ public class MessageDispatcherTest {
     Message request = Message.newBuilder().setModule(4)
         .build();
 
-    int size = 100, senders = 128, total = size * senders;
+    int size = 100, senders = 8, total = size * senders;
     CountDownLatch latch = new CountDownLatch(total);
     int[] result = new int[total + 1];
     EventLoopGroup group = new NioEventLoopGroup(4, new NamedThreadFactory("count_client"));
