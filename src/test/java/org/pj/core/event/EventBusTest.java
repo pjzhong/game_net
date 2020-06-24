@@ -57,11 +57,11 @@ public class EventBusTest {
     Assert.assertEquals(testSystem.number, 2);
 
     gameContext.asyncFireEvent(INIT_EVENT, 1);
-    TimeUnit.MILLISECONDS.sleep(1);
+    TimeUnit.MILLISECONDS.sleep(100);
     Assert.assertEquals(testSystem.number, 1);
 
     gameContext.asyncFireEvent(ADD_EVENT, 1);
-    TimeUnit.MILLISECONDS.sleep(1);
+    TimeUnit.MILLISECONDS.sleep(100);
     Assert.assertEquals(testSystem.number, 2);
 
     gameContext.close();

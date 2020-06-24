@@ -109,7 +109,7 @@ public class MessageDispatcherTest {
         .setBody(world.toByteString())
         .build();
 
-    int loop = 1000;
+    int loop = 100;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleTcpClient client = new ExampleTcpClient("localhost", 8080,
         new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
