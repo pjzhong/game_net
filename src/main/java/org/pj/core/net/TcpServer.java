@@ -45,6 +45,9 @@ public class TcpServer implements AutoCloseable {
 
   @Override
   public void close() {
+    if (bootstrap == null) {
+      return;
+    }
     bootstrap.config().group().shutdownGracefully();
     bootstrap.config().childGroup().shutdownGracefully();
   }
