@@ -106,7 +106,8 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
       dispatcher.registerHandler(obj);
     }
 
-    //TODO 触发全部系统初始完毕事件
+    //触发全部系统初始完毕事件
+    fireEvent(SystemEvent.ALL_SYSTEM_INIT.getType());
   }
 
   private int getPriority(ISystem obj) {

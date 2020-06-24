@@ -29,7 +29,15 @@ public class ExampleTcpClient {
     this.host = host;
     this.port = port;
     this.handler = handler;
-    initBootstrap();
+    initBootstrap(new NioEventLoopGroup(1, new NamedThreadFactory("tcp_client")));
+  }
+
+  public ExampleTcpClient(String host, int port, EventLoopGroup group, ChannelHandler handler)
+      throws InterruptedException {
+    this.host = host;
+    this.port = port;
+    this.handler = handler;
+    initBootstrap(group);
   }
 
   public void sendMsg(String msg) {
@@ -44,8 +52,7 @@ public class ExampleTcpClient {
     channel.writeAndFlush(buf, channel.voidPromise());
   }
 
-  private void initBootstrap() throws InterruptedException {
-    EventLoopGroup loopGroup = new NioEventLoopGroup(4, new NamedThreadFactory("Tcp_client"));
+  private void initBootstrap(EventLoopGroup loopGroup) throws InterruptedException {
     bootstrap = new Bootstrap()
         .group(loopGroup)
         .channel(NioSocketChannel.class)
@@ -58,6 +65,11 @@ public class ExampleTcpClient {
         .handler(handler);
 
     channel = bootstrap.connect(host, port).sync().channel();
+  }
+
+  public void close() {
+    channel.close();
+    bootstrap.config().group().shutdownGracefully();
   }
 
 }

@@ -4,6 +4,7 @@ package org.pj.protocols.hello;
 import com.google.protobuf.ByteString;
 import io.netty.channel.Channel;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.Packet;
 import org.pj.protocols.Facade;
@@ -23,11 +24,12 @@ public class HelloFacade {
 
   private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+  private AtomicInteger integer = new AtomicInteger();
+
   @Packet(1)
   public Message HelloWorld() {
     return Message.newBuilder().setBody(ByteString.copyFromUtf8("HelloWorld")).build();
   }
-
 
   @Packet(2)
   public Message echoContext(Channel channel, Message message) {
@@ -40,6 +42,15 @@ public class HelloFacade {
     logger.info("from {} msg {}", channel.remoteAddress(), world.getStr());
     Objects.requireNonNull(channel);
     return world;
+  }
+
+  @Packet(4)
+  public HelloWorld count(Channel channel) {
+    HelloWorld h = HelloWorld.newBuilder().setCount(integer.incrementAndGet()).build();
+    String address = channel.remoteAddress().toString();
+
+    logger.info("from {} count {}", address.substring(address.lastIndexOf(':')), h.getCount());
+    return h;
   }
 
   public HelloWorld noEffect(HelloWorld world) {

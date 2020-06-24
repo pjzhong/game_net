@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.ArrayUtils;
 import org.pj.core.msg.MessageProto.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 消息处理调用者
@@ -15,15 +17,19 @@ import org.pj.core.msg.MessageProto.Message;
  **/
 public class MessageInvoker implements Runnable {
 
+  private static final Logger logger = LoggerFactory.getLogger(MessageInvoker.class);
+
   private final InvokeContext context;
   private final HandlerInfo info;
   private final AtomicInteger msgCount;
+  private final long start;
 
   public MessageInvoker(InvokeContext context, HandlerInfo info,
       AtomicInteger msgCount) {
     this.context = context;
     this.info = info;
     this.msgCount = msgCount;
+    this.start = System.currentTimeMillis();
   }
 
   @Override
@@ -60,6 +66,11 @@ public class MessageInvoker implements Runnable {
           String.format("Handler %s error", context.getMessage().getModule()), e);
     } finally {
       msgCount.decrementAndGet();
+    }
+
+    long cost = System.currentTimeMillis() - start;
+    if (100 < cost) {
+      logger.info("handle message [{}] cost [{}ms]", context.getMessage().getModule(), cost);
     }
   }
 }

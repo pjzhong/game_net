@@ -28,11 +28,13 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) {
+    dispatcher.channelActive(ctx);
     ctx.fireChannelActive();
   }
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) {
+    dispatcher.channelInactive(ctx);
     ctx.fireChannelInactive();
   }
 

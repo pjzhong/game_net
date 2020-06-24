@@ -11,8 +11,8 @@ import org.springframework.context.support.GenericApplicationContext;
 
 public class EventBusTest {
 
-  private static int INIT_EVENT = 1;
-  private static int ADD_EVENT = 2;
+  private static int INIT_EVENT = 100;
+  private static int ADD_EVENT = 200;
 
   @Test
   public void simpleTest() {

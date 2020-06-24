@@ -40,7 +40,7 @@ public class TcpServerTest {
     }));
 
     CountDownLatch latch = new CountDownLatch(1);
-    WebSocketClient client = new EchoWebSocketClient(new URI("ws://127.0.0.1:8080"), latch) {
+    WebSocketClient client = new ExampleWebSocketClient(new URI("ws://127.0.0.1:8080"), latch) {
       @Override
       public void onMessage(ByteBuffer bytes) {
         try {
@@ -57,6 +57,7 @@ public class TcpServerTest {
 
     boolean suc = latch.await(1, TimeUnit.SECONDS);
     server.close();
+    client.close();
 
     Assert.assertTrue("Echo Failed", suc);
   }
@@ -100,6 +101,7 @@ public class TcpServerTest {
 
     boolean suc = latch.await(1, TimeUnit.SECONDS);
     server.close();
+    client.close();
 
     Assert.assertTrue("Echo Failed", suc);
   }

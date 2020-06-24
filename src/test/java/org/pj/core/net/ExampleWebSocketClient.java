@@ -8,16 +8,22 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class EchoWebSocketClient extends WebSocketClient {
+public class ExampleWebSocketClient extends WebSocketClient {
 
 
   private Logger logger = LoggerFactory.getLogger(this.getClass());
   private CountDownLatch latch;
 
-  public EchoWebSocketClient(URI serverUri,  CountDownLatch latch) {
+  public ExampleWebSocketClient(URI serverUri) {
+    super(serverUri);
+  }
+
+
+  public ExampleWebSocketClient(URI serverUri, CountDownLatch latch) {
     super(serverUri);
     this.latch = latch;
   }
+
 
   @Override
   public void onOpen(ServerHandshake serverHandshake) {
@@ -27,13 +33,15 @@ public class EchoWebSocketClient extends WebSocketClient {
   @Override
   public void onMessage(String s) {
     logger.info(s);
-    latch.countDown();
+
   }
 
   @Override
   public void onMessage(ByteBuffer bytes) {
     logger.info(new String(bytes.array()));
-    latch.countDown();
+    if (latch != null) {
+      latch.countDown();
+    }
   }
 
   @Override

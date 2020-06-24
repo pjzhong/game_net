@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.pj.boot.ServerConfig;
 import org.pj.core.framework.SpringGameContext;
 import org.pj.core.msg.MessageProto.Message;
-import org.pj.core.net.EchoWebSocketClient;
+import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -53,7 +53,7 @@ public class GameContextTest {
 
     int loop = 5;
     CountDownLatch latch = new CountDownLatch(loop);
-    WebSocketClient client = new EchoWebSocketClient(new URI("ws://127.0.0.1:8080"), latch) {
+    WebSocketClient client = new ExampleWebSocketClient(new URI("ws://127.0.0.1:8080"), latch) {
       @Override
       public void onMessage(ByteBuffer bytes) {
         try {

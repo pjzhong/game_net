@@ -12,13 +12,13 @@ public class EventTestSystem implements ISystem {
   private Logger logger = LoggerFactory.getLogger(this.getClass());
   public int number = 0;
 
-  @Listen(1)
+  @Listen(100)
   public void init(int num) {
     number = num;
     logger.debug("EventTestSystem 1 event trigger");
   }
 
-  @Listen(2)
+  @Listen(200)
   public void add(int add) {
     number += add;
     logger.debug("EventTestSystem 2 event trigger");

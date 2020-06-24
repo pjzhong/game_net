@@ -1,5 +1,6 @@
 package org.pj.boot;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -14,12 +15,7 @@ public class BootConfigTest {
 
     JdbcTemplate template = context.getBean("configDao", JdbcTemplate.class);
     SqlRowSet set = template.queryForRowSet("SELECT * FROM item_item WHERE  1 = ?", 1);
-    while(set.next()) {
-      for(String s : set.getMetaData().getColumnNames()) {
-        System.out.format("%s-%s ", s, set.getString(s));
-      }
-      System.out.println();
-    }
+    Assert.assertTrue(set.next());
   }
 
 }

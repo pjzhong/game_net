@@ -8,4 +8,5 @@ option java_outer_classname = "HelloWorldProto";
 message HelloWorld {
 
   string str = 1;
+  int32 count = 2;
 }
