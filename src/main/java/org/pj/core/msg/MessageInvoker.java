@@ -1,6 +1,7 @@
 package org.pj.core.msg;
 
 import com.google.protobuf.MessageLite;
+import io.netty.channel.Channel;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -47,20 +48,27 @@ public class MessageInvoker implements Runnable {
       Object handler = info.getHandler();
 
       Object result = method.invoke(handler, params);
+      Channel channel = context.getChannel();
 
+      //TODO RESPONSE HANDLE
       if (result != null) {
         if (result instanceof Message) {
-          context.getChannel().write(result);
+          channel.write(result);
         } else if (result instanceof MessageLite) {
           Message response = Message
               .newBuilder()
               .mergeFrom(context.getMessage())
               .setBody(((MessageLite) result).toByteString()).build();
-          context.getChannel().write(response);
+          channel.write(response);
         }
 
-        context.getChannel().flush();
+      } else {
+        Message response = Message
+            .newBuilder()
+            .build();
+        channel.write(response);
       }
+      channel.flush();
     } catch (Exception e) {
       throw new RuntimeException(
           String.format("Handler %s error", context.getMessage().getModule()), e);

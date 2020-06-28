@@ -30,14 +30,13 @@ public class ServerConfig {
     return new TcpServer(env.getRequiredProperty("game.port", Integer.class));
   }
 
-  @Bean(destroyMethod = "close")
+  @Bean
   public SpringGameContext gameContext(GenericApplicationContext context, TcpServer tcpServer) {
     SpringGameContext gameContext = new SpringGameContext(context);
     gameContext.setEventBus(new EventBus());
     gameContext.setTcpServer(tcpServer);
     gameContext
         .setDispatcher(new MessageDispatcher(Runtime.getRuntime().availableProcessors() * 2));
-    gameContext.init();
     return gameContext;
   }
 

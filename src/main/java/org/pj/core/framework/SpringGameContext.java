@@ -2,6 +2,7 @@ package org.pj.core.framework;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   private MessageDispatcher dispatcher;
   private TcpServer tcpServer;
   private GenericApplicationContext context;
+  private Thread shutdownHook;
 
   public SpringGameContext(GenericApplicationContext ctx) {
     channels = new ConcurrentSkipListSet<>();
@@ -123,9 +125,13 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   }
 
   public void start() throws Exception {
+    init();
     startTcpServer();
+  }
 
-    Runtime.getRuntime().removeShutdownHook(new Thread(this::close));
+  public void registerShutdownHook() {
+    shutdownHook = new Thread(this::doClose);
+    Runtime.getRuntime().addShutdownHook(shutdownHook);
   }
 
   private void startTcpServer() throws Exception {
@@ -144,7 +150,14 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   }
 
   @Override
-  public void close() {
+  public synchronized void close() {
+    if (shutdownHook != null) {
+      Runtime.getRuntime().removeShutdownHook(shutdownHook);
+    }
+    doClose();
+  }
+
+  private void doClose() {
     logger.info("shutdown All connections");
     channels.forEach(Channel::close);
     logger.info("shutdown dispatcher");
@@ -153,6 +166,8 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     destroySystems();
     logger.info("shutdown tcpServer");
     tcpServer.close();
+
+    context.close();
 
     logger.info("gameContext shutdown success");
   }
@@ -168,6 +183,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     }
   }
 
+  @Sharable
   private static class ChannelCollector extends ChannelInboundHandlerAdapter {
 
     private final Set<Channel> channels;

@@ -16,30 +16,27 @@ import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
 
 public class GameContextTest {
 
-  private static GenericApplicationContext context;
+  private static SpringGameContext ctx;
 
   @BeforeClass
   public static void init() throws Exception {
     long start = System.currentTimeMillis();
-    context = new AnnotationConfigApplicationContext(ServerConfig.class);
+    AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ServerConfig.class);
     SpringGameContext gameContext = context.getBean(SpringGameContext.class);
     gameContext.start();
+
+    ctx = gameContext;
     System.out.println("cost:" + (System.currentTimeMillis() - start));
   }
 
   @AfterClass
   public static void end() throws Exception {
-    context.close();
+    ctx.close();
   }
 
-  @Test
-  public void start() throws Exception {
-
-  }
 
   @Test
   public void echoHelloWorld() throws Exception {
