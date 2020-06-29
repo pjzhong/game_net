@@ -130,7 +130,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   }
 
   public void registerShutdownHook() {
-    shutdownHook = new Thread(this::doClose);
+    shutdownHook = new ShutdownHook(context);
     Runtime.getRuntime().addShutdownHook(shutdownHook);
   }
 
@@ -151,13 +151,10 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
   @Override
   public synchronized void close() {
-    if (shutdownHook != null) {
-      Runtime.getRuntime().removeShutdownHook(shutdownHook);
-    }
     doClose();
   }
 
-  private void doClose() {
+  void doClose() {
     logger.info("shutdown All connections");
     channels.forEach(Channel::close);
     logger.info("shutdown dispatcher");
@@ -166,8 +163,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     destroySystems();
     logger.info("shutdown tcpServer");
     tcpServer.close();
-
-    context.close();
 
     logger.info("gameContext shutdown success");
   }
