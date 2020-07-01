@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 import org.pj.core.event.EventBus;
 import org.pj.core.framework.SpringGameContext;
 import org.pj.core.msg.MessageDispatcher;
-import org.pj.core.net.TcpServer;
+import org.pj.core.net.NettyTcpServer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -26,12 +26,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public class ServerConfig {
 
   @Bean
-  public TcpServer tcpServer(Environment env) {
-    return new TcpServer(env.getRequiredProperty("game.port", Integer.class));
+  public NettyTcpServer tcpServer(Environment env) {
+    return new NettyTcpServer(env.getRequiredProperty("game.port", Integer.class));
   }
 
   @Bean
-  public SpringGameContext gameContext(GenericApplicationContext context, TcpServer tcpServer) {
+  public SpringGameContext gameContext(GenericApplicationContext context, NettyTcpServer tcpServer) {
     SpringGameContext gameContext = new SpringGameContext(context);
     gameContext.setEventBus(new EventBus());
     gameContext.setTcpServer(tcpServer);

@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.pj.common.NamedThreadFactory;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.ExampleTcpClient;
-import org.pj.core.net.TcpServer;
+import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
 import org.pj.protocols.hello.HelloFacade;
@@ -27,7 +27,7 @@ import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
 
 public class MessageDispatcherTest {
 
-  private static TcpServer tcpServer;
+  private static NettyTcpServer tcpServer;
   private static MessageDispatcher dispatcher;
 
   @BeforeClass
@@ -38,7 +38,7 @@ public class MessageDispatcherTest {
     messageDispatcher.registerHandler(new HelloFacade());
     Assert.assertFalse(messageDispatcher.getHandlers().isEmpty());
 
-    TcpServer server = new TcpServer(8080);
+    NettyTcpServer server = new NettyTcpServer(8080);
     server.startUp(new ProtobufSocketHandlerInitializer(new MessageHandler(messageDispatcher)));
 
     tcpServer = server;

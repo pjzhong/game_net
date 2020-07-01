@@ -17,7 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.ExampleWebSocketClient;
-import org.pj.core.net.TcpServer;
+import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
 import org.pj.core.net.init.WebSocketHandlerInitializer;
 import org.pj.protocols.hello.HelloFacade;
@@ -25,7 +25,7 @@ import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
 
 public class WebSocketMessageDispatcherTest {
 
-  private static TcpServer tcpServer;
+  private static NettyTcpServer tcpServer;
   private static MessageDispatcher dispatcher;
 
   @BeforeClass
@@ -36,7 +36,7 @@ public class WebSocketMessageDispatcherTest {
     messageDispatcher.registerHandler(new HelloFacade());
     Assert.assertFalse(messageDispatcher.getHandlers().isEmpty());
 
-    TcpServer server = new TcpServer(8080);
+    NettyTcpServer server = new NettyTcpServer(8080);
     server.startUp(new WebSocketHandlerInitializer(new MessageHandler(messageDispatcher)));
 
     tcpServer = server;

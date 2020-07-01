@@ -76,7 +76,7 @@ public class EventBus {
   private Set<Subscriber> getListeners(int type) {
     Set<Subscriber> calls = callbacks.getOrDefault(type, Collections.emptySet());
     if (calls.isEmpty()) {
-      logger.info("No Subscribe for {}", type);
+      logger.warn("No Subscribe for {}", type);
     }
     return calls;
   }

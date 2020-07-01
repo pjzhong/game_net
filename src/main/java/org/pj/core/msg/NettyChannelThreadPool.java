@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import org.pj.common.NamedThreadFactory;
 import org.slf4j.Logger;
@@ -77,7 +78,7 @@ class NettyChannelThreadPool {
    */
   public ExecutorService getPool(Channel o) {
     Integer idx = poolIdx(o).get();
-    return pools[idx == null ? 0 : idx];
+    return pools[idx == null ? ThreadLocalRandom.current().nextInt(pools.length) : idx];
   }
 
   private Attribute<Integer> poolIdx(Channel o) {
@@ -92,7 +93,7 @@ class NettyChannelThreadPool {
     for (ExecutorService e : pools) {
       e.shutdown();
       e.awaitTermination(10, TimeUnit.SECONDS);
-      logger.info("{} isShutdown", e, e.isShutdown());
+      logger.debug("{} isShutdown", e, e.isShutdown());
       e.shutdownNow();
     }
     poolBinds.clear();

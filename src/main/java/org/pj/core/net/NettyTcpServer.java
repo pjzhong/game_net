@@ -1,6 +1,8 @@
 package org.pj.core.net;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -11,14 +13,15 @@ import org.pj.common.NamedThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TcpServer implements AutoCloseable {
+public class NettyTcpServer implements AutoCloseable {
 
   private final int port;
   private Logger logger = LoggerFactory.getLogger(this.getClass());
   private ServerBootstrap bootstrap;
+  private Channel channel;
 
 
-  public TcpServer(int port) {
+  public NettyTcpServer(int port) {
     this.port = port;
   }
 
@@ -38,7 +41,9 @@ public class TcpServer implements AutoCloseable {
     bootstrap.handler(new LoggingHandler(LogLevel.INFO));
     bootstrap.childHandler(handler);
 
-    bootstrap.bind(port).sync().await();
+    ChannelFuture future = bootstrap.bind(port).sync().await();
+
+    channel = future.channel();
 
     logger.info("Tcp server, init at:{}", port);
   }
@@ -48,6 +53,7 @@ public class TcpServer implements AutoCloseable {
     if (bootstrap == null) {
       return;
     }
+    channel.close();
     bootstrap.config().group().shutdownGracefully();
     bootstrap.config().childGroup().shutdownGracefully();
   }

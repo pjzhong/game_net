@@ -109,7 +109,7 @@ public class MessageDispatcher implements AutoCloseable {
     ContextAdapter contextFieldAdapter = ContextAdapter.getInstance();
     ProtobufAdapter protobufParserAdapter = ProtobufAdapter.getInstance();
 
-    for(int i = 0; i < parameters.length; i++) {
+    for (int i = 0; i < parameters.length; i++) {
       Parameter p = parameters[i];
       pInfos[i] = new ParameterInfo(parameters[i]);
       if (contextFieldAdapter.isContextField(p.getType())) {

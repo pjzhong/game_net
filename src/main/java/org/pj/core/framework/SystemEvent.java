@@ -7,7 +7,12 @@ package org.pj.core.framework;
  * @since 2020年06月19日 17:00:08
  **/
 public enum SystemEvent {
-  ALL_SYSTEM_INIT(1);
+  // 连接断开
+  CHANNEL_IN_ACTIVE(1022),
+  //系统初始完成
+  AFTER_INIT(1023),
+  //系统启动成功
+  SYSTEM_START(1024);
 
   int type;
 

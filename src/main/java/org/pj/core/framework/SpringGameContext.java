@@ -22,7 +22,7 @@ import javax.annotation.Priority;
 import org.apache.commons.lang3.ArrayUtils;
 import org.pj.core.event.EventBus;
 import org.pj.core.msg.MessageDispatcher;
-import org.pj.core.net.TcpServer;
+import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
 import org.pj.core.net.init.WebSocketHandlerInitializer;
@@ -44,9 +44,8 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   private ExecutorService service;
   private EventBus eventBus;
   private MessageDispatcher dispatcher;
-  private TcpServer tcpServer;
+  private NettyTcpServer tcpServer;
   private GenericApplicationContext context;
-  private Thread shutdownHook;
 
   public SpringGameContext(GenericApplicationContext ctx) {
     channels = new ConcurrentSkipListSet<>();
@@ -78,7 +77,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     this.dispatcher = dispatcher;
   }
 
-  public void setTcpServer(TcpServer tcpServer) {
+  public void setTcpServer(NettyTcpServer tcpServer) {
     this.tcpServer = tcpServer;
   }
 
@@ -109,7 +108,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     }
 
     //触发全部系统初始完毕事件
-    fireEvent(SystemEvent.ALL_SYSTEM_INIT.getType());
+    fireEvent(SystemEvent.AFTER_INIT.getType());
   }
 
   private int getPriority(ISystem obj) {
@@ -127,16 +126,18 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   public void start() throws Exception {
     init();
     startTcpServer();
+
+    fireEvent(SystemEvent.SYSTEM_START.getType());
   }
 
   public void registerShutdownHook() {
-    shutdownHook = new ShutdownHook(context);
+    Thread shutdownHook = new ShutdownHook(context);
     Runtime.getRuntime().addShutdownHook(shutdownHook);
   }
 
   private void startTcpServer() throws Exception {
     List<ChannelHandler> channelHandlers = new ArrayList<>();
-    channelHandlers.add(new ChannelCollector(channels));
+    channelHandlers.add(new ChannelCollector(this));
     channelHandlers.add(new MessageHandler(dispatcher));
 
     boolean isSocket = context.getEnvironment().getProperty("game.isSocket", Boolean.class, false);
@@ -181,21 +182,24 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   @Sharable
   private static class ChannelCollector extends ChannelInboundHandlerAdapter {
 
-    private final Set<Channel> channels;
+    private final SpringGameContext context;
 
-    public ChannelCollector(Set<Channel> channels) {
-      this.channels = channels;
+    public ChannelCollector(SpringGameContext context) {
+      this.context = context;
+
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-      channels.add(ctx.channel());
+      context.channels.add(ctx.channel());
       ctx.fireChannelActive();
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-      channels.remove(ctx.channel());
+      //连接断开事件
+      context.fireEvent(SystemEvent.CHANNEL_IN_ACTIVE.getType(), ctx.channel());
+      context.channels.remove(ctx.channel());
       ctx.fireChannelInactive();
     }
   }

@@ -26,7 +26,7 @@ public class TcpServerTest {
         .setSerial(0)
         .setBody(ByteString.copyFromUtf8("Hello, WebSocket World!!!!")).build();
 
-    TcpServer server = new TcpServer(8080);
+    NettyTcpServer server = new NettyTcpServer(8080);
     server.startUp(new WebSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
       @Override
       protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
@@ -71,7 +71,7 @@ public class TcpServerTest {
         .setSerial(0)
         .setBody(ByteString.copyFromUtf8("Hello, Socket World!!!!")).build();
 
-    TcpServer server = new TcpServer(8080);
+    NettyTcpServer server = new NettyTcpServer(8080);
     server.startUp(new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
       @Override
       protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
