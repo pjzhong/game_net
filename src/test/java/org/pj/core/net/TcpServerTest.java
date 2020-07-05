@@ -13,7 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
-import org.pj.core.net.init.WebSocketHandlerInitializer;
+import org.pj.core.net.init.WebSocketServerHandlerInitializer;
 
 public class TcpServerTest {
 
@@ -27,7 +27,7 @@ public class TcpServerTest {
         .setBody(ByteString.copyFromUtf8("Hello, WebSocket World!!!!")).build();
 
     NettyTcpServer server = new NettyTcpServer(8080);
-    server.startUp(new WebSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
+    server.startUp(new WebSocketServerHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
       @Override
       protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
         ctx.write(msg);

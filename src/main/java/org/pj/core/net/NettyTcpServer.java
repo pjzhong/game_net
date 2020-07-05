@@ -48,6 +48,10 @@ public class NettyTcpServer implements AutoCloseable {
     logger.info("Tcp server, init at:{}", port);
   }
 
+  public ServerBootstrap getBootstrap() {
+    return bootstrap;
+  }
+
   @Override
   public void close() {
     if (bootstrap == null) {

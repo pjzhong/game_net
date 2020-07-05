@@ -36,39 +36,7 @@ public class MessageInvoker implements Runnable {
   @Override
   public void run() {
     try {
-      List<IAdapter<?>> adapters = info.getAdapters();
-      Object[] params =
-          adapters.isEmpty() ? ArrayUtils.EMPTY_OBJECT_ARRAY : new Object[adapters.size()];
-
-      for (int i = 0, size = params.length; i < size; i++) {
-        params[i] = adapters.get(i).adapter(context, info, i);
-      }
-
-      Method method = info.getMethod();
-      Object handler = info.getHandler();
-
-      Object result = method.invoke(handler, params);
-      Channel channel = context.getChannel();
-
-      //TODO RESPONSE HANDLE
-      if (result != null) {
-        if (result instanceof Message) {
-          channel.write(result);
-        } else if (result instanceof MessageLite) {
-          Message response = Message
-              .newBuilder()
-              .mergeFrom(context.getMessage())
-              .setBody(((MessageLite) result).toByteString()).build();
-          channel.write(response);
-        }
-
-      } else {
-        Message response = Message
-            .newBuilder()
-            .build();
-        channel.write(response);
-      }
-      channel.flush();
+      doRun();
     } catch (Exception e) {
       throw new RuntimeException(
           String.format("Handler %s error", context.getMessage().getModule()), e);
@@ -80,5 +48,47 @@ public class MessageInvoker implements Runnable {
     if (100 < cost) {
       logger.info("handle message [{}] cost [{}ms]", context.getMessage().getModule(), cost);
     }
+  }
+
+  private void doRun() throws Exception {
+    List<IAdapter<?>> adapters = info.getAdapters();
+    Object[] params =
+        adapters.isEmpty() ? ArrayUtils.EMPTY_OBJECT_ARRAY : new Object[adapters.size()];
+
+    for (int i = 0, size = params.length; i < size; i++) {
+      params[i] = adapters.get(i).adapter(context, info, i);
+    }
+
+    Method method = info.getMethod();
+    Object handler = info.getHandler();
+
+    Object result = method.invoke(handler, params);
+    Channel channel = context.getChannel();
+    Message request = context.getMessage();
+    int responseType = request.getModule();
+    if (0 < responseType) {
+      responseType = -responseType;
+    }
+
+    //TODO RESPONSE HANDLE
+    Message response = null;
+    if (result instanceof Message) {
+      response = (Message) result;
+    }
+
+    if (response == null) {
+      Message.Builder builder = Message.newBuilder();
+      if (result instanceof MessageLite) {
+        builder
+            .mergeFrom(context.getMessage())
+            .setBody(((MessageLite) result).toByteString()).build();
+      } else {
+        logger.error("module {} can't return type {}", request.getModule(),
+            result.getClass().getName());
+      }
+      response = builder.setSerial(request.getSerial()).setModule(responseType).build();
+    }
+
+    channel.writeAndFlush(response);
   }
 }

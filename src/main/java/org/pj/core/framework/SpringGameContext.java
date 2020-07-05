@@ -25,7 +25,7 @@ import org.pj.core.msg.MessageDispatcher;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
-import org.pj.core.net.init.WebSocketHandlerInitializer;
+import org.pj.core.net.init.WebSocketServerHandlerInitializer;
 import org.pj.protocols.Facade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   private Logger logger = LoggerFactory.getLogger(this.getClass());
 
   private Set<Channel> channels;
-  private ExecutorService service;
+  private ExecutorService executorService;
   private EventBus eventBus;
   private MessageDispatcher dispatcher;
   private NettyTcpServer tcpServer;
@@ -50,7 +50,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   public SpringGameContext(GenericApplicationContext ctx) {
     channels = new ConcurrentSkipListSet<>();
     context = ctx;
-    service = workStrealingPool();
+    executorService = workStrealingPool();
   }
 
   private ForkJoinPool workStrealingPool() {
@@ -63,6 +63,14 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
     return new ForkJoinPool
         (Runtime.getRuntime().availableProcessors(), factory, null, true);
+  }
+
+  public MessageDispatcher getDispatcher() {
+    return dispatcher;
+  }
+
+  public NettyTcpServer getTcpServer() {
+    return tcpServer;
   }
 
   public void setEventBus(EventBus eventBus) {
@@ -83,6 +91,10 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
   public void init() {
     initSystem();
+  }
+
+  public Set<Channel> getChannels() {
+    return channels;
   }
 
   private void initSystem() {
@@ -145,9 +157,21 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     if (isSocket) {
       handler = new ProtobufSocketHandlerInitializer(channelHandlers);
     } else {
-      handler = new WebSocketHandlerInitializer(channelHandlers);
+      handler = new WebSocketServerHandlerInitializer(channelHandlers);
     }
     tcpServer.startUp(handler);
+  }
+
+  public String getProperty(String key) {
+    return context.getEnvironment().getProperty(key);
+  }
+
+  public <T> T getProperty(String key, Class<T> targetType, T defaultValue) {
+    return context.getEnvironment().getProperty(key, targetType, defaultValue);
+  }
+
+  public ExecutorService getExecutorService() {
+    return executorService;
   }
 
   @Override
@@ -165,6 +189,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     logger.info("shutdown tcpServer");
     tcpServer.close();
 
+    executorService.shutdown();
     logger.info("gameContext shutdown success");
   }
 
@@ -214,11 +239,11 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   }
 
   public void asyncFireEvent(int type) {
-    eventBus.asyncFireEvent(service, type, ArrayUtils.EMPTY_OBJECT_ARRAY);
+    eventBus.asyncFireEvent(executorService, type, ArrayUtils.EMPTY_OBJECT_ARRAY);
   }
 
   public void asyncFireEvent(int type, Object... params) {
-    eventBus.asyncFireEvent(service, type, params);
+    eventBus.asyncFireEvent(executorService, type, params);
   }
 
   /*    Spring 代理方法            */

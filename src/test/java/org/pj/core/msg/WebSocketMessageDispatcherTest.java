@@ -19,7 +19,7 @@ import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
-import org.pj.core.net.init.WebSocketHandlerInitializer;
+import org.pj.core.net.init.WebSocketServerHandlerInitializer;
 import org.pj.protocols.hello.HelloFacade;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
 
@@ -37,7 +37,7 @@ public class WebSocketMessageDispatcherTest {
     Assert.assertFalse(messageDispatcher.getHandlers().isEmpty());
 
     NettyTcpServer server = new NettyTcpServer(8080);
-    server.startUp(new WebSocketHandlerInitializer(new MessageHandler(messageDispatcher)));
+    server.startUp(new WebSocketServerHandlerInitializer(new MessageHandler(messageDispatcher)));
 
     tcpServer = server;
     dispatcher = messageDispatcher;
@@ -126,7 +126,7 @@ public class WebSocketMessageDispatcherTest {
       } catch (InvalidProtocolBufferException e) {
         e.printStackTrace();
       }
-      Assert.assertEquals(request, msg);
+      Assert.assertEquals(request.getBody(), msg.getBody());
       Assert.assertEquals(world, echoWorld);
       latch.countDown();
     });

@@ -117,7 +117,7 @@ public class MessageDispatcherTest {
           public void channelRead0(ChannelHandlerContext ctx, Message msg)
               throws InvalidProtocolBufferException {
             HelloWorld echoWorld = HelloWorld.parseFrom(msg.getBody());
-            Assert.assertEquals(request, msg);
+            Assert.assertEquals(request.getBody(), msg.getBody());
             Assert.assertEquals(world, echoWorld);
             latch.countDown();
           }
