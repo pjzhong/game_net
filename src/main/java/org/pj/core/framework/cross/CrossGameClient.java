@@ -65,6 +65,7 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
     return id;
   }
 
+  //TODO 提供非阻塞式链接
   public void connect(URI uri) throws Exception {
     InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
     List<ChannelHandler> channelHandlers = Collections.singletonList(this);

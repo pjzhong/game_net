@@ -51,6 +51,11 @@ public class HelloFacade {
     return h;
   }
 
+  @Packet(5)
+  public Message throwException() {
+    throw new UnsupportedOperationException();
+  }
+
   public HelloWorld noEffect(HelloWorld world) {
     return world;
   }

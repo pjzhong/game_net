@@ -43,12 +43,6 @@ public class MessageHandler extends SimpleChannelInboundHandler<Message> {
     dispatcher.add(ctx.channel(), msg);
   }
 
-
-  @Override
-  public void channelReadComplete(ChannelHandlerContext ctx) {
-    ctx.flush();
-  }
-
   /**
    * Calls {@link ChannelHandlerContext#fireExceptionCaught(Throwable)} to forward to the next
    * {@link ChannelHandler} in the {@link ChannelPipeline}.

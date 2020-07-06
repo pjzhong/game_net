@@ -50,7 +50,7 @@ public class CrossClientTest {
   @Test
   public void echoTest() throws Exception {
     CrossGameClient client = new CrossGameClient(local);
-    client.connect(URI.create("//localhost:8081"));
+    client.connect(URI.create("ws://localhost:8081"));
 
     Message request = Message.newBuilder()
         .setModule(client.genMsgId())

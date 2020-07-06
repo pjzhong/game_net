@@ -36,22 +36,37 @@ public class MessageInvoker implements Runnable {
 
   @Override
   public void run() {
+    Channel channel = context.getChannel();
+    Message request = context.getMessage();
     try {
-      doRun();
-    } catch (Exception e) {
-      throw new RuntimeException(
-          String.format("Handler %s error", context.getMessage().getModule()), e);
-    } finally {
-      msgCount.decrementAndGet();
-    }
+      Message message = doRun();
+      channel.write(message);
 
-    long cost = System.currentTimeMillis() - start;
-    if (100 < cost) {
-      logger.info("handle message [{}] cost [{}ms]", context.getMessage().getModule(), cost);
+      long cost = System.currentTimeMillis() - start;
+      if (100 < cost) {
+        logger.info("cid [{}] handle message [{}] cost [{}ms]", channel.id(), request.getModule(),
+            cost);
+      }
+    } catch (Exception e) {
+      channel.write(sysErr(request));
+      logger
+          .error(String.format("cid [%s] handle [%s] error", channel.id(), request.getModule()),
+              e);
+    } finally {
+      channel.eventLoop().execute(channel::flush);
+      msgCount.decrementAndGet();
     }
   }
 
-  private void doRun() throws Exception {
+  private Message sysErr(Message request) {
+    Message.Builder builder = Message.newBuilder();
+    fillState(builder, request);
+    return builder
+        .setStat(100)//TODO 规范化 消息状态码
+        .build();
+  }
+
+  private Message doRun() throws Exception {
     List<IAdapter<?>> adapters = info.getAdapters();
     Object[] params =
         adapters.isEmpty() ? ArrayUtils.EMPTY_OBJECT_ARRAY : new Object[adapters.size()];
@@ -62,7 +77,6 @@ public class MessageInvoker implements Runnable {
 
     Method method = info.getMethod();
     Object handler = info.getHandler();
-    Channel channel = context.getChannel();
     Message request = context.getMessage();
 
     Object result = method.invoke(handler, params);
@@ -80,7 +94,7 @@ public class MessageInvoker implements Runnable {
     }
 
     fillState(builder, request);
-    channel.writeAndFlush(builder.build());
+    return builder.build();
   }
 
   private Builder fillState(Message.Builder builder, Message request) {

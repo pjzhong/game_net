@@ -66,10 +66,12 @@ public class MessageDispatcher implements AutoCloseable {
     if (handler == null) {
       logger.error("No handler for module-{}", msg.getModule());
       channel.write(NoModuleResponse(msg));
+      channel.eventLoop().execute(channel::flush);
       return false;
     }
 
     Executor executor = pool.getPool(channel);
+
     MessageInvoker invoker = new MessageInvoker(new InvokeContext(channel, msg), handler, msgCount);
     executor.execute(invoker);
     msgCount.incrementAndGet();
