@@ -25,21 +25,35 @@ import org.slf4j.LoggerFactory;
 public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
 
   private Logger log = LoggerFactory.getLogger(this.getClass());
-  private Map<Integer, SocketCallback<Message>> callbacks;
+  private Map<Integer, SocketCallback<?>> callbacks;
   private SpringGameContext context;
   private NettyTcpClient client;
   private AtomicInteger msgId;
   private CountDownLatch webSocketWait;
+  private CrossSendProxy proxy;
 
   public CrossGameClient(SpringGameContext ctx) {
     this.context = ctx;
     this.callbacks = new ConcurrentHashMap<>();
     this.msgId = new AtomicInteger();
     this.client = new NettyTcpClient(ctx.getTcpServer().getBootstrap().config().childGroup());
+    this.proxy = new CrossSendProxy(this);
   }
 
-  public void addSocketCallback(int msgId, SocketCallback<Message> callBack) {
+  public void addSocketCallback(int msgId, SocketCallback<?> callBack) {
     this.callbacks.put(msgId, callBack);
+  }
+
+  public SocketCallback<?> removeCallBack(int msgId) {
+    return callbacks.remove(msgId);
+  }
+
+  public <T, R> T asyncProxy(Class<T> clz, ResultCallBack<R> callback) {
+    return proxy.asynProxy(clz, callback);
+  }
+
+  public <T> T syncProxy(Class<T> clz) {
+    return proxy.snycProxy(clz);
   }
 
   public int genMsgId() {
@@ -68,20 +82,8 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
     }
   }
 
-  public int sendMessage(Message msg, SocketCallback<Message> callback) {
-    int serial = genMsgId();
-    Message newMsg = Message
-        .newBuilder()
-        .mergeFrom(msg)
-        .setSerial(serial)
-        .build();
-    callbacks.put(newMsg.getSerial(), callback);
-    boolean suc = client.sendMessage(newMsg);
-    if (!suc) {
-      serial = -1;
-      callbacks.remove(serial);
-    }
-    return serial;
+  public boolean sendMessage(Message msg) {
+    return client.sendMessage(msg);
   }
 
   @Override
@@ -108,19 +110,11 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
   }
 
   @Override
-  protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
-    SocketCallback<Message> callback = callbacks.remove(msg.getSerial());
+  protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
+    SocketCallback<Object> callback = (SocketCallback<Object>) callbacks.remove(msg.getSerial());
     if (callback != null) { //TODO 执行回调
       ExecutorService group = context.getExecutorService();
-      group.execute(() -> {
-        try {
-          callback.onSuccess(msg);
-        } catch (Exception exp) {
-          callback.onError(exp);
-          log.error(String.format("CrossClient Handel MsgType-<%s> Exception!", msg.getModule()),
-              exp);
-        }
-      });
+      group.execute(() -> callback.accept(msg));
     } else {
       //内部消息
       context.getDispatcher().add(ctx.channel(), msg);

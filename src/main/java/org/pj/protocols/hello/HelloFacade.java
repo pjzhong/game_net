@@ -38,9 +38,7 @@ public class HelloFacade {
   }
 
   @Packet(3)
-  public HelloWorld echoHelloWorld(Channel channel, HelloWorld world) {
-    logger.info("from {} msg {}", channel.remoteAddress(), world.getStr());
-    Objects.requireNonNull(channel);
+  public HelloWorld echoHelloWorld(HelloWorld world) {
     return world;
   }
 

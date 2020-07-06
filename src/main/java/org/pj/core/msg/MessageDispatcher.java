@@ -65,6 +65,7 @@ public class MessageDispatcher implements AutoCloseable {
     HandlerInfo handler = handlers.get(msg.getModule());
     if (handler == null) {
       logger.error("No handler for module-{}", msg.getModule());
+      channel.write(NoModuleResponse(msg));
       return false;
     }
 
@@ -73,6 +74,14 @@ public class MessageDispatcher implements AutoCloseable {
     executor.execute(invoker);
     msgCount.incrementAndGet();
     return true;
+  }
+
+  private Message NoModuleResponse(Message message) {
+    return Message.newBuilder()
+        .setSerial(message.getSerial())
+        .setModule(message.getModule() < 0 ? message.getModule() : -message.getModule())
+        .setStat(-1)//TODO 规范错误码
+        .build();
   }
 
   public void registerHandler(Object handler) {

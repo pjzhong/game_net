@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.ArrayUtils;
 import org.pj.core.msg.MessageProto.Message;
+import org.pj.core.msg.MessageProto.Message.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,34 +62,39 @@ public class MessageInvoker implements Runnable {
 
     Method method = info.getMethod();
     Object handler = info.getHandler();
-
-    Object result = method.invoke(handler, params);
     Channel channel = context.getChannel();
     Message request = context.getMessage();
+
+    Object result = method.invoke(handler, params);
+
+    Builder builder = Message.newBuilder();
+    if (result instanceof Message) {
+      builder.mergeFrom((Message) result);
+    } else if (result instanceof MessageLite) {
+      builder
+          .mergeFrom(context.getMessage())
+          .setBody(((MessageLite) result).toByteString());
+    } else {
+      logger.error("module {} can't return type {}", request.getModule(),
+          result.getClass().getName());
+    }
+
+    fillState(builder, request);
+    channel.writeAndFlush(builder.build());
+  }
+
+  private Builder fillState(Message.Builder builder, Message request) {
     int responseType = request.getModule();
     if (0 < responseType) {
       responseType = -responseType;
     }
 
-    //TODO RESPONSE HANDLE
-    Message response = null;
-    if (result instanceof Message) {
-      response = (Message) result;
+    builder
+        .setSerial(request.getSerial())
+        .setModule(responseType);
+    if (builder.getStat() == 0) {
+      builder.setStat(200);
     }
-
-    if (response == null) {
-      Message.Builder builder = Message.newBuilder();
-      if (result instanceof MessageLite) {
-        builder
-            .mergeFrom(context.getMessage())
-            .setBody(((MessageLite) result).toByteString()).build();
-      } else {
-        logger.error("module {} can't return type {}", request.getModule(),
-            result.getClass().getName());
-      }
-      response = builder.setSerial(request.getSerial()).setModule(responseType).build();
-    }
-
-    channel.writeAndFlush(response);
+    return builder;
   }
 }

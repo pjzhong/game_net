@@ -9,19 +9,11 @@ package org.pj.core.framework.cross;
 public interface SocketCallback<T> {
 
   /**
-   * 请求成功的回调
+   * 请求成功的回调(此成功为网络层的成功)
    *
    * @param t 返回的数据
    * @since 2020年07月02日 09:58:14
    */
-  void onSuccess(T t);
-
-  /**
-   * 请求失败的时的调用
-   *
-   * @param var1 对应异常
-   * @since 2020年07月02日 09:58:39
-   */
-  void onError(Exception var1);
+  void accept(T t);
 
 }

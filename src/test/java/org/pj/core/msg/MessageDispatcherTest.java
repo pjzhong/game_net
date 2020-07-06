@@ -89,7 +89,9 @@ public class MessageDispatcherTest {
         new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
           @Override
           public void channelRead0(ChannelHandlerContext ctx, Message msg) {
-            Assert.assertEquals(request, msg);
+            Assert.assertEquals(request.getBody(), msg.getBody());
+            Assert.assertEquals(-request.getModule(), msg.getModule());
+            Assert.assertEquals(200, msg.getStat());
             latch.countDown();
           }
         }));

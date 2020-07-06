@@ -97,7 +97,9 @@ public class WebSocketMessageDispatcherTest {
     int loop = 5;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleWebSocketClient client = newClient(msg -> {
-      Assert.assertEquals(request, msg);
+      Assert.assertEquals(request.getBody(), msg.getBody());
+      Assert.assertEquals(-request.getModule(), msg.getModule());
+      Assert.assertEquals(200, msg.getStat());
       latch.countDown();
     });
 
