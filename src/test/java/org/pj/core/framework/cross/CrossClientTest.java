@@ -8,14 +8,12 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pj.boot.CrossServerConfig;
-import org.pj.boot.ServerConfig;
+import org.pj.boot.GameBoot;
 import org.pj.core.framework.SpringGameContext;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.Packet;
 import org.pj.protocols.Facade;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 
 public class CrossClientTest {
@@ -28,14 +26,13 @@ public class CrossClientTest {
 
   @BeforeClass
   public static void start() throws Exception {
-    localCtx = new AnnotationConfigApplicationContext(ServerConfig.class);
-    local = localCtx.getBean(SpringGameContext.class);
-    local.start();
+    GameBoot localBoot = GameBoot.start();
+    localCtx = localBoot.getSpringCtx();
+    local = localBoot.getGameCtx();
 
-    crossCtx = new AnnotationConfigApplicationContext(
-        CrossServerConfig.class);
-    cross = crossCtx.getBean(SpringGameContext.class);
-    cross.start();
+    GameBoot crossBoot = GameBoot.start("cross");
+    crossCtx = crossBoot.getSpringCtx();
+    cross = crossBoot.getGameCtx();
   }
 
   @AfterClass

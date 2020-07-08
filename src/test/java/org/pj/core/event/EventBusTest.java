@@ -3,11 +3,9 @@ package org.pj.core.event;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
-import org.pj.boot.ServerConfig;
+import org.pj.boot.GameBoot;
 import org.pj.core.framework.SpringGameContext;
 import org.pj.module.event.EventTestSystem;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
 
 public class EventBusTest {
 
@@ -44,9 +42,8 @@ public class EventBusTest {
 
   @Test
   public void withGameContext() throws Exception {
-    GenericApplicationContext context = new AnnotationConfigApplicationContext(ServerConfig.class);
-    SpringGameContext gameContext = context.getBean(SpringGameContext.class);
-    gameContext.start();
+    GameBoot localBoot = GameBoot.start();
+    SpringGameContext gameContext = localBoot.getGameCtx();
 
     EventTestSystem testSystem = gameContext.getBean(EventTestSystem.class);
 
@@ -65,6 +62,7 @@ public class EventBusTest {
     Assert.assertEquals(testSystem.number, 2);
 
     gameContext.close();
+    localBoot.getSpringCtx().close();
   }
 
 }

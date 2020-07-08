@@ -16,14 +16,13 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pj.boot.ServerConfig;
+import org.pj.boot.GameBoot;
 import org.pj.core.framework.SpringGameContext;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.core.net.NettyTcpClient;
 import org.pj.core.net.init.WebSocketClientHandlerInitializer;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 
 public class GameContextTest {
@@ -34,11 +33,10 @@ public class GameContextTest {
   @BeforeClass
   public static void init() throws Exception {
     long start = System.currentTimeMillis();
-    context = new AnnotationConfigApplicationContext(ServerConfig.class);
-    SpringGameContext gameContext = context.getBean(SpringGameContext.class);
-    gameContext.start();
+    GameBoot boot = GameBoot.start();
 
-    ctx = gameContext;
+    ctx = boot.getGameCtx();
+    context = boot.getSpringCtx();
     System.out.println("cost:" + (System.currentTimeMillis() - start));
   }
 

@@ -117,6 +117,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     Map<String, Object> facades = context.getBeansWithAnnotation(Facade.class);
     for (Object obj : facades.values()) {
       dispatcher.registerHandler(obj);
+      logger.info("{} created", obj.getClass().getSimpleName());
     }
 
     //触发全部系统初始完毕事件
