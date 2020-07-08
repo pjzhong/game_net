@@ -1,13 +1,16 @@
 package org.pj.core.framework.cross;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.protobuf.ByteString;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.pj.boot.GameBoot;
 import org.pj.core.framework.SpringGameContext;
 import org.pj.core.msg.MessageProto.Message;
@@ -24,7 +27,7 @@ public class CrossClientTest {
   private static SpringGameContext local;
   private static SpringGameContext cross;
 
-  @BeforeClass
+  @BeforeAll
   public static void start() throws Exception {
     GameBoot localBoot = GameBoot.start();
     localCtx = localBoot.getSpringCtx();
@@ -35,7 +38,7 @@ public class CrossClientTest {
     cross = crossBoot.getGameCtx();
   }
 
-  @AfterClass
+  @AfterAll
   public static void close() {
     local.close();
     cross.close();
@@ -58,14 +61,14 @@ public class CrossClientTest {
     client.addSocketCallback(request.getSerial(), new SocketCallback<Message>() {
       @Override
       public void accept(Message message) {
-        Assert.assertEquals(request.getBody(), message.getBody());
-        Assert.assertEquals(request.getSerial(), message.getSerial());
+        assertEquals(request.getBody(), message.getBody());
+        assertEquals(request.getSerial(), message.getSerial());
         latch.countDown();
       }
     });
     client.sendMessage(request);
 
-    Assert.assertTrue("echo failed", latch.await(100, TimeUnit.MILLISECONDS));
+    assertTrue(latch.await(100, TimeUnit.MILLISECONDS), "echo failed");
   }
 
   @Test
@@ -80,14 +83,14 @@ public class CrossClientTest {
         .asyncProxy(CrossHelloFacade.class, new ResultCallBackAdapter<HelloWorld>() {
           @Override
           public void accept(HelloWorld message) {
-            Assert.assertEquals(helloWorld, message);
+            assertEquals(helloWorld, message);
             latch.countDown();
           }
 
         });
 
     facade.echoHelloWorld(helloWorld);
-    Assert.assertTrue("echo failed", latch.await(100, TimeUnit.MILLISECONDS));
+    assertTrue(latch.await(100, TimeUnit.MILLISECONDS), "echo failed");
   }
 
   @Test
@@ -99,7 +102,7 @@ public class CrossClientTest {
     CrossHelloFacade facade = client.syncProxy(CrossHelloFacade.class);
 
     HelloWorld world = facade.echoHelloWorld(helloWorld);
-    Assert.assertEquals(helloWorld, world);
+    assertEquals(helloWorld, world);
   }
 
   @Test
@@ -108,7 +111,7 @@ public class CrossClientTest {
     client.connect(URI.create("//localhost:8081"));
 
     CrossHelloFacade facade = client.syncProxy(CrossHelloFacade.class);
-    Assert.assertNull(facade.notExists());
+    assertNull(facade.notExists());
   }
 
 

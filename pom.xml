@@ -78,24 +78,36 @@
       <artifactId>spring-boot-starter-log4j2</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.junit.vintage</groupId>
+          <artifactId>junit-vintage-engine</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
     <!-- spring -->
-<!--    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>${spring.version}</version>
-    </dependency>-->
+    <!--    <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-context</artifactId>
+          <version>${spring.version}</version>
+        </dependency>-->
 
-<!--    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-jdbc</artifactId>
-      <version>${spring.version}</version>
-    </dependency>-->
+    <!--    <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-jdbc</artifactId>
+          <version>${spring.version}</version>
+        </dependency>-->
 
-<!--    <dependency>
-      <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-mongodb</artifactId>
-      <version>${spring.mongodb.version}</version>
-    </dependency>-->
+    <!--    <dependency>
+          <groupId>org.springframework.data</groupId>
+          <artifactId>spring-data-mongodb</artifactId>
+          <version>${spring.mongodb.version}</version>
+        </dependency>-->
 
 
     <!-- MySql 数据库 -->
@@ -117,23 +129,23 @@
       <version>${netty.version}</version>
     </dependency>
 
-<!--    &lt;!&ndash;核心log4j2jar包 &ndash;&gt;
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <version>${log4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-api</artifactId>
-      <version>${log4j.version}</version>
-    </dependency>
-    &lt;!&ndash;用于与slf4j保持桥接 &ndash;&gt;
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-slf4j-impl</artifactId>
-      <version>${slf4j.verion}</version>
-    </dependency>-->
+    <!--    &lt;!&ndash;核心log4j2jar包 &ndash;&gt;
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
+          <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+          <version>${log4j.version}</version>
+        </dependency>
+        &lt;!&ndash;用于与slf4j保持桥接 &ndash;&gt;
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+          <version>${slf4j.verion}</version>
+        </dependency>-->
 
 
     <dependency>
@@ -146,29 +158,22 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-     <!-- <version>${commons-lang3.version}</version>-->
+      <!-- <version>${commons-lang3.version}</version>-->
     </dependency>
 
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <!--<version>4.11</version>-->
-      <scope>test</scope>
-    </dependency>
+    <!--    <dependency>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter</artifactId>
+          <version>${junit.jupiter.version}</version>
+          <scope>test</scope>
+        </dependency>
 
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <version>${junit.jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>${junit.jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
+        <dependency>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter-api</artifactId>
+          <version>${junit.jupiter.version}</version>
+          <scope>test</scope>
+        </dependency>-->
 
     <dependency>
       <groupId>org.hamcrest</groupId>
@@ -265,36 +270,36 @@
 
 
       <!-- 打成可运行jar包 -->
-<!--      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.1.0</version>
-        <configuration>
-          <excludes>
-            <exclude>**/*.jar</exclude>
-            <exclude>**/*.properties</exclude>
-            <exclude>**/*.sql</exclude>
-            <exclude>**/*.xml</exclude>
-            <exclude>**/*.css</exclude>
-            <exclude>**/*.js</exclude>
-            <exclude>**/*.jsp</exclude>
-            <exclude>**/*.tld</exclude>
-            <exclude>**/*.txt</exclude>
-            <exclude>**/*.groovy</exclude>
-          </excludes>
-          <outputDirectory>${project.build.directory}/release</outputDirectory>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <classpathPrefix>lib/</classpathPrefix>
-              <mainClass>org.pj.boot.GameBootMain</mainClass>
-            </manifest>
-            <manifestEntries>
-              <Class-Path>.</Class-Path>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>-->
+      <!--      <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-jar-plugin</artifactId>
+              <version>3.1.0</version>
+              <configuration>
+                <excludes>
+                  <exclude>**/*.jar</exclude>
+                  <exclude>**/*.properties</exclude>
+                  <exclude>**/*.sql</exclude>
+                  <exclude>**/*.xml</exclude>
+                  <exclude>**/*.css</exclude>
+                  <exclude>**/*.js</exclude>
+                  <exclude>**/*.jsp</exclude>
+                  <exclude>**/*.tld</exclude>
+                  <exclude>**/*.txt</exclude>
+                  <exclude>**/*.groovy</exclude>
+                </excludes>
+                <outputDirectory>${project.build.directory}/release</outputDirectory>
+                <archive>
+                  <manifest>
+                    <addClasspath>true</addClasspath>
+                    <classpathPrefix>lib/</classpathPrefix>
+                    <mainClass>org.pj.boot.GameBootMain</mainClass>
+                  </manifest>
+                  <manifestEntries>
+                    <Class-Path>.</Class-Path>
+                  </manifestEntries>
+                </archive>
+              </configuration>
+            </plugin>-->
 
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>

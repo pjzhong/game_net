@@ -1,9 +1,9 @@
 package org.pj.boot;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -14,12 +14,12 @@ public class BootConfigTest {
 
   private static GenericApplicationContext context;
 
-  @BeforeClass
+  @BeforeAll
   public static void init() {
     context = new AnnotationConfigApplicationContext(ServerConfig.class);
   }
 
-  @AfterClass
+  @AfterAll
   public static void close() {
     context.close();
   }
@@ -28,7 +28,7 @@ public class BootConfigTest {
   public void sqlTest() {
     JdbcTemplate template = context.getBean("configDao", JdbcTemplate.class);
     SqlRowSet set = template.queryForRowSet("SELECT * FROM item_item WHERE  1 = ?", 1);
-    Assert.assertTrue(set.next());
+    Assertions.assertTrue(set.next());
   }
 
   @Test

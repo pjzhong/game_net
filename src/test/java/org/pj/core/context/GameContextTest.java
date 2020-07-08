@@ -12,10 +12,10 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.java_websocket.client.WebSocketClient;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.pj.boot.GameBoot;
 import org.pj.core.framework.SpringGameContext;
 import org.pj.core.msg.MessageProto.Message;
@@ -30,7 +30,7 @@ public class GameContextTest {
   private static SpringGameContext ctx;
   private static GenericApplicationContext context;
 
-  @BeforeClass
+  @BeforeAll
   public static void init() throws Exception {
     long start = System.currentTimeMillis();
     GameBoot boot = GameBoot.start();
@@ -40,7 +40,7 @@ public class GameContextTest {
     System.out.println("cost:" + (System.currentTimeMillis() - start));
   }
 
-  @AfterClass
+  @AfterAll
   public static void end() throws Exception {
     ctx.close();
     context.close();
@@ -69,7 +69,7 @@ public class GameContextTest {
         try {
           Message echoMessage = Message.parseFrom(bytes);
           HelloWorld echoWorld = HelloWorld.parseFrom(echoMessage.getBody());
-          Assert.assertEquals(echoWorld, world);
+          Assertions.assertEquals(echoWorld, world);
         } catch (InvalidProtocolBufferException e) {
           e.printStackTrace();
         }
@@ -83,7 +83,7 @@ public class GameContextTest {
     }
 
     boolean suc = latch.await(1, TimeUnit.SECONDS);
-    Assert.assertTrue("Echo Failed", suc);
+    Assertions.assertTrue(suc, "Echo Failed");
   }
 
   @Test
@@ -115,14 +115,14 @@ public class GameContextTest {
 
               @Override
               protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
-                Assert.assertEquals(-5, msg.getModule());
-                Assert.assertEquals(100, msg.getStat());
+                Assertions.assertEquals(-5, msg.getModule());
+                Assertions.assertEquals(100, msg.getStat());
                 latch.countDown();
               }
             }));
 
     boolean suc = latch.await(1, TimeUnit.SECONDS);
-    Assert.assertTrue("test err-response Failed", suc);
+    Assertions.assertTrue(suc, "test err-response Failed");
 
     group.shutdownGracefully();
     client.close();

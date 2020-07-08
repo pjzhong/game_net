@@ -1,8 +1,8 @@
 package org.pj.core.event;
 
 import java.util.concurrent.TimeUnit;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.pj.boot.GameBoot;
 import org.pj.core.framework.SpringGameContext;
 import org.pj.module.event.EventTestSystem;
@@ -19,10 +19,10 @@ public class EventBusTest {
     bus.registerEvent(testSystem);
 
     bus.fireEvent(INIT_EVENT, 1);
-    Assert.assertEquals(testSystem.number, 1);
+    Assertions.assertEquals(testSystem.number, 1);
 
     bus.fireEvent(ADD_EVENT, 1);
-    Assert.assertEquals(testSystem.number, 2);
+    Assertions.assertEquals(testSystem.number, 2);
   }
 
   @Test
@@ -33,11 +33,11 @@ public class EventBusTest {
 
     bus.asyncFireEvent(INIT_EVENT, 1);
     TimeUnit.MILLISECONDS.sleep(1);
-    Assert.assertEquals(testSystem.number, 1);
+    Assertions.assertEquals(testSystem.number, 1);
 
     bus.asyncFireEvent(ADD_EVENT, 1);
     TimeUnit.MILLISECONDS.sleep(1);
-    Assert.assertEquals(testSystem.number, 2);
+    Assertions.assertEquals(testSystem.number, 2);
   }
 
   @Test
@@ -48,18 +48,18 @@ public class EventBusTest {
     EventTestSystem testSystem = gameContext.getBean(EventTestSystem.class);
 
     gameContext.fireEvent(INIT_EVENT, 1);
-    Assert.assertEquals(testSystem.number, 1);
+    Assertions.assertEquals(testSystem.number, 1);
 
     gameContext.fireEvent(ADD_EVENT, 1);
-    Assert.assertEquals(testSystem.number, 2);
+    Assertions.assertEquals(testSystem.number, 2);
 
     gameContext.asyncFireEvent(INIT_EVENT, 1);
     TimeUnit.MILLISECONDS.sleep(100);
-    Assert.assertEquals(testSystem.number, 1);
+    Assertions.assertEquals(testSystem.number, 1);
 
     gameContext.asyncFireEvent(ADD_EVENT, 1);
     TimeUnit.MILLISECONDS.sleep(100);
-    Assert.assertEquals(testSystem.number, 2);
+    Assertions.assertEquals(testSystem.number, 2);
 
     gameContext.close();
     localBoot.getSpringCtx().close();

@@ -12,10 +12,10 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.pj.common.NamedThreadFactory;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
@@ -27,7 +27,7 @@ public class TcpClientTest {
   private static NettyTcpServer server;
   private static NettyTcpServer webSocketServer;
 
-  @BeforeClass
+  @BeforeAll
   public static void start() throws Exception {
     server = new NettyTcpServer(8080);
     server.startUp(new ProtobufSocketHandlerInitializer(
@@ -58,7 +58,7 @@ public class TcpClientTest {
         }));
   }
 
-  @AfterClass
+  @AfterAll
   public static void close() {
     server.close();
     webSocketServer.close();
@@ -73,7 +73,7 @@ public class TcpClientTest {
         new SimpleChannelInboundHandler<Message>() {
           @Override
           protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
-            Assert.assertEquals(msg, message);
+            Assertions.assertEquals(msg, message);
             latch.countDown();
           }
         });
@@ -82,7 +82,7 @@ public class TcpClientTest {
     client.connect(new InetSocketAddress("127.0.0.1", 8080), handler);
     client.sendMessage(message);
 
-    Assert.assertTrue("Echo failed", latch.await(1, TimeUnit.SECONDS));
+    Assertions.assertTrue(latch.await(1, TimeUnit.SECONDS), "Echo failed");
 
     client.close();
   }
@@ -109,7 +109,7 @@ public class TcpClientTest {
 
           @Override
           protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
-            Assert.assertEquals(msg, message);
+            Assertions.assertEquals(msg, message);
             latch.countDown();
           }
         });
@@ -120,7 +120,7 @@ public class TcpClientTest {
     wait.await(1, TimeUnit.SECONDS);
     client.sendMessage(message);
 
-    Assert.assertTrue("Echo failed", latch.await(1, TimeUnit.SECONDS));
+    Assertions.assertTrue(latch.await(1, TimeUnit.SECONDS), "Echo failed");
   }
 
 }

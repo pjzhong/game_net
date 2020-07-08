@@ -1,10 +1,11 @@
 package org.pj.core.msg;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Arrays;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pj.core.msg.MessageProto.Message;
 
 public class ProtoTest {
@@ -23,7 +24,7 @@ public class ProtoTest {
     byte[] array = message.toByteArray();
     System.out.println(Arrays.toString(array));
     Message parseMessage = Message.parseFrom(array);
-    Assert.assertEquals(message, parseMessage);
+    assertEquals(message, parseMessage);
   }
 
 }

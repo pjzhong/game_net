@@ -1,5 +1,9 @@
 package org.pj.core.msg;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,10 +16,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.pj.common.NamedThreadFactory;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.ExampleTcpClient;
@@ -30,13 +34,13 @@ public class MessageDispatcherTest {
   private static NettyTcpServer tcpServer;
   private static MessageDispatcher dispatcher;
 
-  @BeforeClass
+  @BeforeAll
   public static void init() throws Exception {
     MessageDispatcher messageDispatcher = new MessageDispatcher(
         Runtime.getRuntime().availableProcessors() * 2);
 
     messageDispatcher.registerHandler(new HelloFacade());
-    Assert.assertFalse(messageDispatcher.getHandlers().isEmpty());
+    assertFalse(messageDispatcher.getHandlers().isEmpty());
 
     NettyTcpServer server = new NettyTcpServer(8080);
     server.startUp(new ProtobufSocketHandlerInitializer(new MessageHandler(messageDispatcher)));
@@ -45,7 +49,7 @@ public class MessageDispatcherTest {
     dispatcher = messageDispatcher;
   }
 
-  @AfterClass
+  @AfterAll
   public static void close() {
     dispatcher.close();
     tcpServer.close();
@@ -65,7 +69,7 @@ public class MessageDispatcherTest {
         new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
           @Override
           public void channelRead0(ChannelHandlerContext ctx, Message msg) {
-            Assert.assertEquals("HelloWorld", msg.getBody().toStringUtf8());
+            assertEquals(msg.getBody().toStringUtf8(), "HelloWorld");
             latch.countDown();
           }
         }));
@@ -74,7 +78,7 @@ public class MessageDispatcherTest {
       client.sendMsg(request);
     }
 
-    Assert.assertTrue("HelloWorld Failed", latch.await(300, TimeUnit.MILLISECONDS));
+    assertTrue(latch.await(300, TimeUnit.MILLISECONDS), "HelloWorld Failed");
   }
 
   @Test
@@ -89,9 +93,9 @@ public class MessageDispatcherTest {
         new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
           @Override
           public void channelRead0(ChannelHandlerContext ctx, Message msg) {
-            Assert.assertEquals(request.getBody(), msg.getBody());
-            Assert.assertEquals(-request.getModule(), msg.getModule());
-            Assert.assertEquals(200, msg.getStat());
+            assertEquals(request.getBody(), msg.getBody());
+            assertEquals(-request.getModule(), msg.getModule());
+            assertEquals(200, msg.getStat());
             latch.countDown();
           }
         }));
@@ -100,7 +104,7 @@ public class MessageDispatcherTest {
       client.sendMsg(request);
     }
 
-    Assert.assertTrue("Echo Failed", latch.await(300, TimeUnit.MILLISECONDS));
+    assertTrue(latch.await(300, TimeUnit.MILLISECONDS), "Echo Failed");
   }
 
   @Test
@@ -119,8 +123,8 @@ public class MessageDispatcherTest {
           public void channelRead0(ChannelHandlerContext ctx, Message msg)
               throws InvalidProtocolBufferException {
             HelloWorld echoWorld = HelloWorld.parseFrom(msg.getBody());
-            Assert.assertEquals(request.getBody(), msg.getBody());
-            Assert.assertEquals(world, echoWorld);
+            assertEquals(request.getBody(), msg.getBody());
+            assertEquals(world, echoWorld);
             latch.countDown();
           }
         }));
@@ -129,7 +133,7 @@ public class MessageDispatcherTest {
       client.sendMsg(request);
     }
 
-    Assert.assertTrue("Echo Failed", latch.await(1, TimeUnit.SECONDS));
+    assertTrue(latch.await(1, TimeUnit.SECONDS), "Echo Failed");
   }
 
   @Test
@@ -163,9 +167,9 @@ public class MessageDispatcherTest {
       pool.execute(() -> clients[idx].sendMsg(request));
     }
 
-    Assert.assertTrue("Count TimeOut", latch.await(1, TimeUnit.MINUTES));
+    assertTrue(latch.await(1, TimeUnit.MINUTES));
     for (int i = 1; i <= total; i++) {
-      Assert.assertEquals(i, result[i]);
+      assertEquals(i, result[i]);
     }
 
     System.out.println(Arrays.toString(result));
@@ -175,13 +179,14 @@ public class MessageDispatcherTest {
     }
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void duplicatedRegister() {
     MessageDispatcher messageDispatcher = new MessageDispatcher(
         Runtime.getRuntime().availableProcessors());
 
     messageDispatcher.registerHandler(new HelloFacade());
-    messageDispatcher.registerHandler(new HelloFacade());
+    Assertions.assertThrows(IllegalArgumentException.class,
+        () -> messageDispatcher.registerHandler(new HelloFacade()));
   }
 
 }

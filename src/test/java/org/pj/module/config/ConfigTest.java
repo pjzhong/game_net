@@ -1,17 +1,21 @@
 package org.pj.module.config;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.util.Properties;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.pj.module.conf.Config;
 import org.pj.module.conf.ConfigSystem.ConfigBuilder;
 
 public class ConfigTest {
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void noneNullTest() throws Exception {
     ConfigBuilder builder = new ConfigBuilder();
-    builder.autowired(new Properties(), SimpleConfig.class);
+    Assertions.assertThrows(RuntimeException.class,
+        () -> builder.autowired(new Properties(), SimpleConfig.class));
   }
 
   @Test
@@ -25,12 +29,12 @@ public class ConfigTest {
     properties.put("aDouble", "1");
     SimpleConfig config = builder.autowired(properties, SimpleConfig.class);
 
-    Assert.assertNull(config.getNullString());
-    Assert.assertEquals(config.getString(), "1");
-    Assert.assertEquals(config.getI(), 1);
-    Assert.assertEquals(config.getInteger().intValue(), 1);
-    Assert.assertEquals(config.getD(), 1.0D, 0.0);
-    Assert.assertEquals(config.getaDouble(), 1.0D, 0.0);
+    assertNull(config.getNullString());
+    assertEquals(config.getString(), "1");
+    assertEquals(config.getI(), 1);
+    assertEquals(config.getInteger().intValue(), 1);
+    assertEquals(config.getD(), 1.0D, 0.0);
+    assertEquals(config.getaDouble(), 1.0D, 0.0);
   }
 
   @Test
@@ -41,13 +45,8 @@ public class ConfigTest {
     properties.put("three", "1");
     SimpleParser config = builder.autowired(properties, SimpleParser.class);
 
-    Assert.assertEquals(config.getTwo(), 2);
-    Assert.assertEquals(config.getThree(), 3);
-  }
-
-  @Test
-  public void avaConfigTest() {
-
+    assertEquals(config.getTwo(), 2);
+    assertEquals(config.getThree(), 3);
   }
 
   public static class SimpleConfig {

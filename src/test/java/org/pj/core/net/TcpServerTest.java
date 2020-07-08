@@ -1,5 +1,8 @@
 package org.pj.core.net;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.channel.ChannelHandlerContext;
@@ -9,8 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.java_websocket.client.WebSocketClient;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
 import org.pj.core.net.init.WebSocketServerHandlerInitializer;
@@ -27,17 +29,18 @@ public class TcpServerTest {
         .setBody(ByteString.copyFromUtf8("Hello, WebSocket World!!!!")).build();
 
     NettyTcpServer server = new NettyTcpServer(8080);
-    server.startUp(new WebSocketServerHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
-      @Override
-      protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
-        ctx.write(msg);
-      }
+    server
+        .startUp(new WebSocketServerHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
+          @Override
+          protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
+            ctx.write(msg);
+          }
 
-      @Override
-      public void channelReadComplete(ChannelHandlerContext ctx) {
-        ctx.flush();
-      }
-    }));
+          @Override
+          public void channelReadComplete(ChannelHandlerContext ctx) {
+            ctx.flush();
+          }
+        }));
 
     CountDownLatch latch = new CountDownLatch(1);
     WebSocketClient client = new ExampleWebSocketClient(new URI("ws://127.0.0.1:8080"), latch) {
@@ -45,7 +48,7 @@ public class TcpServerTest {
       public void onMessage(ByteBuffer bytes) {
         try {
           Message echoMessage = Message.parseFrom(bytes);
-          Assert.assertEquals(message, echoMessage);
+          assertEquals(message, echoMessage);
         } catch (InvalidProtocolBufferException e) {
           e.printStackTrace();
         }
@@ -59,7 +62,7 @@ public class TcpServerTest {
     server.close();
     client.close();
 
-    Assert.assertTrue("Echo Failed", suc);
+    assertTrue(suc, "Echo Failed");
   }
 
   @Test
@@ -90,7 +93,7 @@ public class TcpServerTest {
           @Override
           public void channelRead0(ChannelHandlerContext ctx, Message msg) {
             System.out.println(msg.getBody().toStringUtf8());
-            Assert.assertEquals(message, msg);
+            assertEquals(message, msg);
             latch.countDown();
           }
         }));
@@ -103,7 +106,7 @@ public class TcpServerTest {
     server.close();
     client.close();
 
-    Assert.assertTrue("Echo Failed", suc);
+    assertTrue(suc, "Echo Failed");
   }
 
 }

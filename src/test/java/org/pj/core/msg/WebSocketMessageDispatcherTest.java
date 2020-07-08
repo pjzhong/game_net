@@ -1,5 +1,9 @@
 package org.pj.core.msg;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.net.URI;
@@ -11,10 +15,9 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.core.net.NettyTcpServer;
@@ -28,13 +31,13 @@ public class WebSocketMessageDispatcherTest {
   private static NettyTcpServer tcpServer;
   private static MessageDispatcher dispatcher;
 
-  @BeforeClass
+  @BeforeAll
   public static void init() throws Exception {
     MessageDispatcher messageDispatcher = new MessageDispatcher(
         Runtime.getRuntime().availableProcessors() * 2);
 
     messageDispatcher.registerHandler(new HelloFacade());
-    Assert.assertFalse(messageDispatcher.getHandlers().isEmpty());
+    assertFalse(messageDispatcher.getHandlers().isEmpty());
 
     NettyTcpServer server = new NettyTcpServer(8080);
     server.startUp(new WebSocketServerHandlerInitializer(new MessageHandler(messageDispatcher)));
@@ -43,7 +46,7 @@ public class WebSocketMessageDispatcherTest {
     dispatcher = messageDispatcher;
   }
 
-  @AfterClass
+  @AfterAll
   public static void close() {
     dispatcher.close();
     tcpServer.close();
@@ -76,14 +79,14 @@ public class WebSocketMessageDispatcherTest {
     int loop = 5;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleWebSocketClient client = newClient(msg -> {
-      Assert.assertEquals("HelloWorld", msg.getBody().toStringUtf8());
+      assertEquals("HelloWorld", msg.getBody().toStringUtf8());
       latch.countDown();
     });
     for (int i = 0; i < loop; i++) {
       client.send(request.toByteArray());
     }
 
-    Assert.assertTrue("HelloWorld Failed", latch.await(300, TimeUnit.MILLISECONDS));
+    assertTrue(latch.await(300, TimeUnit.MILLISECONDS), "HelloWorld Failed");
 
     client.close();
   }
@@ -97,9 +100,9 @@ public class WebSocketMessageDispatcherTest {
     int loop = 5;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleWebSocketClient client = newClient(msg -> {
-      Assert.assertEquals(request.getBody(), msg.getBody());
-      Assert.assertEquals(-request.getModule(), msg.getModule());
-      Assert.assertEquals(200, msg.getStat());
+      assertEquals(request.getBody(), msg.getBody());
+      assertEquals(-request.getModule(), msg.getModule());
+      assertEquals(200, msg.getStat());
       latch.countDown();
     });
 
@@ -107,7 +110,7 @@ public class WebSocketMessageDispatcherTest {
       client.send(request.toByteArray());
     }
 
-    Assert.assertTrue("Echo Failed", latch.await(300, TimeUnit.MILLISECONDS));
+    assertTrue(latch.await(300, TimeUnit.MILLISECONDS), "Echo Failed");
     client.close();
   }
 
@@ -128,8 +131,8 @@ public class WebSocketMessageDispatcherTest {
       } catch (InvalidProtocolBufferException e) {
         e.printStackTrace();
       }
-      Assert.assertEquals(request.getBody(), msg.getBody());
-      Assert.assertEquals(world, echoWorld);
+      assertEquals(request.getBody(), msg.getBody());
+      assertEquals(world, echoWorld);
       latch.countDown();
     });
 
@@ -137,7 +140,7 @@ public class WebSocketMessageDispatcherTest {
       client.send(request.toByteArray());
     }
 
-    Assert.assertTrue("Echo Failed", latch.await(1, TimeUnit.SECONDS));
+    assertTrue(latch.await(1, TimeUnit.SECONDS), "Echo Failed");
 
     client.close();
   }
@@ -172,9 +175,9 @@ public class WebSocketMessageDispatcherTest {
       pool.execute(() -> clients[idx].send(request.toByteArray()));
     }
 
-    Assert.assertTrue("Count TimeOut", latch.await(10, TimeUnit.SECONDS));
+    assertTrue(latch.await(10, TimeUnit.SECONDS), "Count TimeOut");
     for (int i = 1; i <= total; i++) {
-      Assert.assertEquals(i, result[i]);
+      assertEquals(i, result[i]);
     }
 
     System.out.println(Arrays.toString(result));
@@ -182,15 +185,6 @@ public class WebSocketMessageDispatcherTest {
     for (ExampleWebSocketClient c : clients) {
       c.close();
     }
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void duplicatedRegister() {
-    MessageDispatcher messageDispatcher = new MessageDispatcher(
-        Runtime.getRuntime().availableProcessors());
-
-    messageDispatcher.registerHandler(new HelloFacade());
-    messageDispatcher.registerHandler(new HelloFacade());
   }
 
 }

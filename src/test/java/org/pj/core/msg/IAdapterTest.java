@@ -1,14 +1,16 @@
 package org.pj.core.msg;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.mongodb.internal.connection.tlschannel.util.Util.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Parser;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.adp.ContextAdapter;
 import org.pj.core.msg.adp.ProtobufAdapter;
@@ -32,9 +34,9 @@ public class IAdapterTest {
   public void protobufAdapterTest() throws InvalidProtocolBufferException {
     ProtobufAdapter adapter = ProtobufAdapter.getInstance();
 
-    Assert.assertNull(adapter.extractParser(Integer.class));
-    Assert.assertNotNull(adapter.extractParser(Message.class));
-    Assert.assertNotNull(adapter.extractParser(HelloWorld.class));
+    assertNull(adapter.extractParser(Integer.class));
+    assertNotNull(adapter.extractParser(Message.class));
+    assertNotNull(adapter.extractParser(HelloWorld.class));
 
     Parser<?> parser = adapter.extractParser(Message.class);
     Parser<?> helloWorldParser = adapter.extractParser(HelloWorld.class);
@@ -44,8 +46,8 @@ public class IAdapterTest {
     Message echoMessage = (Message) parser.parseFrom(message.toByteString());
     HelloWorld echoHelloWorld = (HelloWorld) helloWorldParser.parseFrom(echoMessage.getBody());
 
-    Assert.assertEquals(message, echoMessage);
-    Assert.assertEquals(helloWorld, echoHelloWorld);
+    assertEquals(message, echoMessage);
+    assertEquals(helloWorld, echoHelloWorld);
   }
 
 }
