@@ -194,7 +194,7 @@
   <build>
     <plugins>
       <!--resource process -->
-      <plugin>
+<!--      <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
         <version>3.0.2</version>
@@ -211,7 +211,7 @@
             <configuration>
               <outputDirectory>${basedir}/target/release</outputDirectory>
               <resources>
-                <!-- 过滤config并输出到target目录下 -->
+                &lt;!&ndash; 过滤config并输出到target目录下 &ndash;&gt;
                 <resource>
                   <directory>src/main/resources</directory>
                   <filtering>true</filtering>
@@ -220,8 +220,8 @@
             </configuration>
           </execution>
         </executions>
-      </plugin>
-      <!-- 输出依赖的jar包 -->
+      </plugin>-->
+<!--      &lt;!&ndash; 输出依赖的jar包 &ndash;&gt;
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
@@ -239,7 +239,7 @@
               <overWriteSnapshots>false</overWriteSnapshots>
               <overWriteIfNewer>true</overWriteIfNewer>
               <includeScope>runtime</includeScope>
-              <!--依赖传递-->
+              &lt;!&ndash;依赖传递&ndash;&gt;
               <excludeTransitive>false</excludeTransitive>
             </configuration>
           </execution>
@@ -255,17 +255,22 @@
               <overWriteSnapshots>false</overWriteSnapshots>
               <overWriteIfNewer>true</overWriteIfNewer>
               <includeScope>system</includeScope>
-              <!--过滤依赖传递-->
+              &lt;!&ndash;过滤依赖传递&ndash;&gt;
               <excludeTransitive>true</excludeTransitive>
             </configuration>
           </execution>
         </executions>
 
-      </plugin>
+      </plugin>-->
 
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <layers>
+            <enabled>true</enabled>
+          </layers>
+        </configuration>
       </plugin>
 
 

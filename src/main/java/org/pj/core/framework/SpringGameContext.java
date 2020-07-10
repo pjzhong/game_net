@@ -46,6 +46,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   private MessageDispatcher dispatcher;
   private NettyTcpServer tcpServer;
   private GenericApplicationContext context;
+  private volatile boolean working;
 
   public SpringGameContext(GenericApplicationContext ctx) {
     channels = new ConcurrentSkipListSet<>();
@@ -137,9 +138,14 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   }
 
   public void start() throws Exception {
+    if(working) {
+      return;
+    }
+
     init();
     startTcpServer();
 
+    working = true;
     fireEvent(SystemEvent.SYSTEM_START.getType());
   }
 
@@ -181,6 +187,10 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   }
 
   void doClose() {
+    if (!working) {
+      return;
+    }
+
     logger.info("shutdown All connections");
     channels.forEach(Channel::close);
     logger.info("shutdown dispatcher");
@@ -191,6 +201,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     tcpServer.close();
 
     executorService.shutdown();
+    working = false;
     logger.info("gameContext shutdown success");
   }
 

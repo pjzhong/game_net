@@ -13,7 +13,7 @@ public class ShutdownHook extends Thread {
 
   @Override
   public void run() {
-    if (context == null) {
+    if (context == null || !context.isRunning()) {
       return;
     }
 
