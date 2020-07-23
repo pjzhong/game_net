@@ -60,7 +60,7 @@
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-undertow</artifactId>
+      <artifactId>spring-boot-starter-reactor-netty</artifactId>
     </dependency>
 
     <dependency>
@@ -123,11 +123,11 @@
     </dependency>
 
     <!-- netty TODO 有空精简下，不要用all-->
-    <dependency>
+<!--    <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-all</artifactId>
       <version>${netty.version}</version>
-    </dependency>
+    </dependency>-->
 
     <!--    &lt;!&ndash;核心log4j2jar包 &ndash;&gt;
         <dependency>
