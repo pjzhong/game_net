@@ -2,7 +2,7 @@
 <Configuration status="INFO">
 
     <Loggers>
-        <Root level="DEBUG">
+        <Root level="INFO">
             <AppenderRef ref="console"/>
             <AppenderRef ref="info_file"/>
             <AppenderRef ref="error_file"/>

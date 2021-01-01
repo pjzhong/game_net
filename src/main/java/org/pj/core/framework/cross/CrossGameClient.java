@@ -13,23 +13,22 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.pj.core.framework.SpringGameContext;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.NettyTcpClient;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
 import org.pj.core.net.init.WebSocketClientHandlerInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
 
-  private Logger log = LoggerFactory.getLogger(this.getClass());
+
   private Map<Integer, SocketCallback<?>> callbacks;
   private SpringGameContext context;
   private NettyTcpClient client;
   private AtomicInteger msgId;
-  private CountDownLatch webSocketWait;
+  private CountDownLatch connectWait;
   private CrossSendProxy proxy;
 
   public CrossGameClient(SpringGameContext ctx) {
@@ -74,12 +73,12 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
     if (isSocket) {
       handler = new ProtobufSocketHandlerInitializer(channelHandlers);
     } else {
-      webSocketWait = new CountDownLatch(1);
+      connectWait = new CountDownLatch(1);
       handler = new WebSocketClientHandlerInitializer(uri, channelHandlers);
     }
     client.connect(address, handler);
-    if (webSocketWait != null) {
-      webSocketWait.await();
+    if (connectWait != null) {
+      connectWait.await(10, TimeUnit.SECONDS);
     }
   }
 
@@ -89,8 +88,8 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
 
   @Override
   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-    if (webSocketWait != null && evt == HANDSHAKE_COMPLETE) {
-      webSocketWait.countDown();
+    if (connectWait != null && evt == HANDSHAKE_COMPLETE) {
+      connectWait.countDown();
     }
     ctx.fireUserEventTriggered(evt);
   }
@@ -98,14 +97,14 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) {
-    context.getChannels().add(ctx.channel());
+    boolean isSocket = context.getProperty("game.isSocket", Boolean.class, false);
     ctx.fireChannelActive();
   }
 
   @Override
   public void channelInactive(ChannelHandlerContext ctx) {
-    if (webSocketWait != null) {
-      webSocketWait.countDown();
+    if (connectWait != null) {
+      connectWait.countDown();
     }
     ctx.fireChannelInactive();
   }
@@ -114,7 +113,7 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
   protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
     SocketCallback<Object> callback = (SocketCallback<Object>) callbacks.remove(msg.getSerial());
     if (callback != null) { //TODO 执行回调
-      ExecutorService group = context.getExecutorService();
+      ExecutorService group = context.nextExecutorService();
       group.execute(() -> callback.accept(msg));
     } else {
       //内部消息

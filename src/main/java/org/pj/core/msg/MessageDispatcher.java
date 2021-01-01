@@ -5,16 +5,15 @@ import io.netty.channel.ChannelHandlerContext;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.lang3.ObjectUtils;
 import org.pj.common.NamedThreadFactory;
+import org.pj.core.framework.GameThreadPool;
 import org.pj.core.msg.HandlerInfo.ParameterInfo;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.adp.ContextAdapter;
@@ -27,16 +26,14 @@ public class MessageDispatcher implements AutoCloseable {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final Map<Integer, HandlerInfo> handlers;
   private final AtomicInteger msgCount;
-  private final NettyChannelThreadPool pool;
-  private final AtomicLong warnTime;
+  private final GameThreadPool pool;
   private volatile boolean work;
 
   public MessageDispatcher(int threadSize) {
-    pool = new NettyChannelThreadPool(threadSize, new NamedThreadFactory("game_thread"));
+    pool = new GameThreadPool(threadSize, new NamedThreadFactory("game_thread"));
     msgCount = new AtomicInteger();
     handlers = new ConcurrentHashMap<>();
     work = true;
-    warnTime = new AtomicLong();
   }
 
   public Map<Integer, HandlerInfo> getHandlers() {
@@ -49,7 +46,6 @@ public class MessageDispatcher implements AutoCloseable {
   }
 
   public void channelInactive(ChannelHandlerContext ctx) {
-    pool.unbind(ctx.channel());
   }
 
   public boolean add(Channel channel, Message msg) {
@@ -59,7 +55,6 @@ public class MessageDispatcher implements AutoCloseable {
 
     int count = msgCount.get();
     if (count > 100) {
-      printState(pool);
     }
 
     HandlerInfo handler = handlers.get(msg.getModule());
@@ -161,22 +156,6 @@ public class MessageDispatcher implements AutoCloseable {
       pool.shutdown();
     } catch (Exception e) {
       logger.info("stooping dispatcher error", e);
-    }
-  }
-
-  private void printState(NettyChannelThreadPool pool) {
-    long now = System.currentTimeMillis(), warn = warnTime.get();
-    if (now < warn) {
-      return;
-    }
-    if (warnTime.compareAndSet(warn, now + 5)) {
-      Map<Integer, Long> stats = pool.getPoolBinds();
-      Collection<Long> statList = stats.values();
-      logger.warn("msgQueue size: {}", msgCount.get());
-      if (0 < statList.size()) {
-        logger.warn("min:{}, max:{}", Collections.min(statList), Collections.max(statList));
-      }
-      logger.warn("{}", stats);
     }
   }
 }
