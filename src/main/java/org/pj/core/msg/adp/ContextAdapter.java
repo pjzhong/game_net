@@ -2,6 +2,7 @@ package org.pj.core.msg.adp;
 
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +33,10 @@ public class ContextAdapter implements IAdapter<Object> {
     Field[] fields = InvokeContext.class.getDeclaredFields();
     Map<Class<?>, Field> fieldMap = new HashMap<>();
     for (Field f : fields) {
+      if(Modifier.isTransient(f.getModifiers())) {
+        continue;
+      }
+
       f.setAccessible(true);
       fieldMap.put(f.getType(), f);
     }

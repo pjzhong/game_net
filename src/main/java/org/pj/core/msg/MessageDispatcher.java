@@ -45,6 +45,9 @@ public class MessageDispatcher implements AutoCloseable {
     disruptorPool.bind(ctx.channel());
   }
 
+  public void channelInactive(ChannelHandlerContext ctx){
+  }
+
   public boolean add(Channel channel, Message msg) {
     if (!work || msg == null || channel == null) {
       return false;
@@ -62,8 +65,9 @@ public class MessageDispatcher implements AutoCloseable {
       return false;
     }
 
-    // TODO 这里尝试对象复用和Disruptor
-    MessageInvoker invoker = new MessageInvoker(channel, msg, handler);
+    // TODO 用了，但是效果不明显
+    InvokeContext invoker = InvokeContext.FACTORY.get();
+    invoker.setValue(channel, msg, handler);
     disruptorPool.exec(channel, invoker);
     return true;
   }

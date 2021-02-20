@@ -61,9 +61,9 @@ public class GameContextTest {
         .setSerial(0)
         .setBody(HelloWorld.newBuilder().setStr("Hello World").build().toByteString()).build();
 
-    int loop = 5;
-    CountDownLatch latch = new CountDownLatch(loop);
-    WebSocketClient client = new ExampleWebSocketClient(new URI("ws://127.0.0.1:8080"), latch) {
+    int loop = 10000;
+    CountDownLatch latch = new CountDownLatch(loop * 2);
+    WebSocketClient client1 = new ExampleWebSocketClient(new URI("ws://127.0.0.1:8080"), latch) {
       @Override
       public void onMessage(ByteBuffer bytes) {
         try {
@@ -76,10 +76,26 @@ public class GameContextTest {
         latch.countDown();
       }
     };
-    client.connectBlocking();
+    WebSocketClient client2 = new ExampleWebSocketClient(new URI("ws://127.0.0.1:8080"), latch) {
+      @Override
+      public void onMessage(ByteBuffer bytes) {
+        try {
+          Message echoMessage = Message.parseFrom(bytes);
+          HelloWorld echoWorld = HelloWorld.parseFrom(echoMessage.getBody());
+          Assertions.assertEquals(echoWorld, world);
+        } catch (InvalidProtocolBufferException e) {
+          e.printStackTrace();
+        }
+        latch.countDown();
+      }
+    };
+
+    client1.connectBlocking();
+    client2.connectBlocking();
 
     for (int i = 0; i < loop; i++) {
-      client.send(message.toByteArray());
+      client1.send(message.toByteArray());
+      client2.send(message.toByteArray());
     }
 
     boolean suc = latch.await(1, TimeUnit.SECONDS);

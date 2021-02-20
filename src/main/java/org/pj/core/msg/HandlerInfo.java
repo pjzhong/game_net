@@ -3,6 +3,8 @@ package org.pj.core.msg;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 
 public class HandlerInfo {
 
@@ -10,10 +12,12 @@ public class HandlerInfo {
   private final Method method;
   private List<ParameterInfo> parameterInfos;
   private List<IAdapter<?>> adapters;
+  private ThreadLocal<Object[]> paramsArray;
 
   public HandlerInfo(Object object, Method method) {
     this.handler = object;
     this.method = method;
+    this.paramsArray = new ThreadLocal<>();
   }
 
   public void setParameterInfos(List<ParameterInfo> parameterInfos) {
@@ -38,6 +42,16 @@ public class HandlerInfo {
 
   public List<IAdapter<?>> getAdapters() {
     return adapters;
+  }
+
+  public Object[] paramArray() {
+    Object[] result = paramsArray.get();
+    if(result == null) {
+      paramsArray.set(ObjectUtils.isEmpty(parameterInfos) ? ArrayUtils.EMPTY_OBJECT_ARRAY : new Object[parameterInfos.size()]);
+      result = paramsArray.get();
+    }
+
+    return result;
   }
 
   public static class ParameterInfo {
