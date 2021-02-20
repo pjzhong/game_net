@@ -23,14 +23,11 @@ public class MessageInvoker implements Runnable {
 
   private final InvokeContext context;
   private final HandlerInfo info;
-  private final AtomicInteger msgCount;
   private final long start;
 
-  public MessageInvoker(InvokeContext context, HandlerInfo info,
-      AtomicInteger msgCount) {
-    this.context = context;
+  public MessageInvoker(Channel channel, Message message,  HandlerInfo info) {
+    this.context = new InvokeContext(channel, message);
     this.info = info;
-    this.msgCount = msgCount;
     this.start = System.currentTimeMillis();
   }
 
@@ -54,7 +51,6 @@ public class MessageInvoker implements Runnable {
               e);
     } finally {
       channel.eventLoop().execute(channel::flush);
-      msgCount.decrementAndGet();
     }
   }
 

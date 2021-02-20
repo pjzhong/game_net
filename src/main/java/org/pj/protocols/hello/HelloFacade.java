@@ -27,7 +27,7 @@ public class HelloFacade {
   private AtomicInteger integer = new AtomicInteger();
 
   @Packet(1)
-  public Message HelloWorld() {
+  public Message echoHelloWorld() {
     return Message.newBuilder().setBody(ByteString.copyFromUtf8("HelloWorld")).build();
   }
 

@@ -24,7 +24,7 @@ import org.pj.core.net.init.WebSocketClientHandlerInitializer;
 public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
 
 
-  private Map<Integer, SocketCallback<?>> callbacks;
+  private Map<Integer, SocketCallback<Object>> callbacks;
   private SpringGameContext context;
   private NettyTcpClient client;
   private AtomicInteger msgId;
@@ -39,8 +39,8 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
     this.proxy = new CrossSendProxy(this);
   }
 
-  public void addSocketCallback(int msgId, SocketCallback<?> callBack) {
-    this.callbacks.put(msgId, callBack);
+  public <T> void addSocketCallback(int msgId, SocketCallback<T> callBack) {
+    this.callbacks.put(msgId, (SocketCallback<Object>) callBack);
   }
 
   public SocketCallback<?> removeCallBack(int msgId) {
@@ -97,7 +97,7 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) {
-    boolean isSocket = context.getProperty("game.isSocket", Boolean.class, false);
+    context.getDispatcher().channelActive(ctx);
     ctx.fireChannelActive();
   }
 
@@ -111,10 +111,10 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
 
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
-    SocketCallback<Object> callback = (SocketCallback<Object>) callbacks.remove(msg.getSerial());
+    SocketCallback<Object> callback = callbacks.remove(msg.getSerial());
     if (callback != null) { //TODO 执行回调
-      ExecutorService group = context.nextExecutorService();
-      group.execute(() -> callback.accept(msg));
+      //TODO 增加回调执行
+      context.getDispatcher().add(ctx.channel(), msg);
     } else {
       //内部消息
       context.getDispatcher().add(ctx.channel(), msg);

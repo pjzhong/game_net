@@ -8,12 +8,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.ObjectUtils;
 import org.pj.common.NamedThreadFactory;
-import org.pj.core.framework.GameThreadPool;
+import org.pj.core.framework.disruptor.DisruptorThreadPool;
 import org.pj.core.msg.HandlerInfo.ParameterInfo;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.adp.ContextAdapter;
@@ -26,11 +25,12 @@ public class MessageDispatcher implements AutoCloseable {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final Map<Integer, HandlerInfo> handlers;
   private final AtomicInteger msgCount;
-  private final GameThreadPool pool;
+  private DisruptorThreadPool disruptorPool;
   private volatile boolean work;
 
   public MessageDispatcher(int threadSize) {
-    pool = new GameThreadPool(threadSize, new NamedThreadFactory("game_thread"));
+    disruptorPool = new DisruptorThreadPool(threadSize, 4096,
+        new NamedThreadFactory("game-disruptor-thread"));
     msgCount = new AtomicInteger();
     handlers = new ConcurrentHashMap<>();
     work = true;
@@ -42,10 +42,7 @@ public class MessageDispatcher implements AutoCloseable {
 
 
   public void channelActive(ChannelHandlerContext ctx) {
-    pool.bind(ctx.channel());
-  }
-
-  public void channelInactive(ChannelHandlerContext ctx) {
+    disruptorPool.bind(ctx.channel());
   }
 
   public boolean add(Channel channel, Message msg) {
@@ -65,11 +62,9 @@ public class MessageDispatcher implements AutoCloseable {
       return false;
     }
 
-    Executor executor = pool.getPool(channel);
-
-    MessageInvoker invoker = new MessageInvoker(new InvokeContext(channel, msg), handler, msgCount);
-    executor.execute(invoker);
-    msgCount.incrementAndGet();
+    // TODO 这里尝试对象复用和Disruptor
+    MessageInvoker invoker = new MessageInvoker(channel, msg, handler);
+    disruptorPool.exec(channel, invoker);
     return true;
   }
 
@@ -128,18 +123,7 @@ public class MessageDispatcher implements AutoCloseable {
                 method.getDeclaringClass().getName(), method.getName(), p.getName()));
       }
     }
-/*    for (Parameter p : parameters) {
-      pInfos.add(new ParameterInfo(p));
-      if (contextFieldAdapter.isContextField(p.getType())) {
-        adapters.add(contextFieldAdapter);
-      } else if (protobufParserAdapter.extractParser(p.getType()) != null) {
-        adapters.add(protobufParserAdapter);
-      } else {
-        throw new IllegalArgumentException(String
-            .format("Unresolved able method parameters %s%s#%s",
-                method.getDeclaringClass().getName(), method.getName(), p.getName()));
-      }
-    }*/
+
     info.setParameterInfos(Arrays.asList(pInfos));
     info.setAdapters(Arrays.asList(adapters));
   }
@@ -153,7 +137,7 @@ public class MessageDispatcher implements AutoCloseable {
         TimeUnit.SECONDS.sleep(1);
       }
 
-      pool.shutdown();
+      disruptorPool.shutdown();
     } catch (Exception e) {
       logger.info("stooping dispatcher error", e);
     }

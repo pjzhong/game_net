@@ -16,6 +16,7 @@ import javax.annotation.Priority;
 import org.apache.commons.lang3.ArrayUtils;
 import org.pj.core.ShutdownHook;
 import org.pj.core.event.EventBus;
+import org.pj.core.framework.disruptor.DisruptorThreadPool;
 import org.pj.core.msg.MessageDispatcher;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
@@ -35,7 +36,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
   private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  private GameThreadPool executorService;
   private EventBus eventBus;
   private MessageDispatcher dispatcher;
   private NettyTcpServer tcpServer;
@@ -44,20 +44,8 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
   public SpringGameContext(GenericApplicationContext ctx) {
     context = ctx;
-    executorService = new GameThreadPool();
   }
 
-  private ForkJoinPool workStrealingPool() {
-    final ForkJoinWorkerThreadFactory factory = pool -> {
-      final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory
-          .newThread(pool);
-      worker.setName("game-context-" + worker.getPoolIndex());
-      return worker;
-    };
-
-    return new ForkJoinPool
-        (Runtime.getRuntime().availableProcessors(), factory, null, true);
-  }
 
   public MessageDispatcher getDispatcher() {
     return dispatcher;
@@ -165,10 +153,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     return context.getEnvironment().getProperty(key, targetType, defaultValue);
   }
 
-  public ExecutorService nextExecutorService() {
-    return executorService.nextExecutorService();
-  }
-
   @Override
   public synchronized void close() throws Exception {
     doClose();
@@ -187,7 +171,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     logger.info("shutdown tcpServer");
     tcpServer.close();
 
-    executorService.shutdown();
     working = false;
     logger.info("gameContext shutdown success");
   }
