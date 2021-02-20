@@ -43,11 +43,9 @@ public class CrossSendProxy {
   private class SendProxyInvoker implements InvocationHandler {
 
     private CrossGameClient client;
-    private CompletableFuture<?> defaultComplete;
 
     public SendProxyInvoker(CrossGameClient client) {
       this.client = client;
-      this.defaultComplete = CompletableFuture.completedFuture(null);
     }
 
     @Override
@@ -80,7 +78,7 @@ public class CrossSendProxy {
       Message message = builder.build();
       ResultCallBack<?> callback = currentCallBack.get();
       SocketCallback<?> clientCallBack = null;
-      CompletableFuture<?> future = defaultComplete;
+      CompletableFuture<?> future = null;
       currentCallBack.remove();
       if (callback == null) {// TODO 阻塞调用
         future = new CompletableFuture<>();
@@ -95,7 +93,7 @@ public class CrossSendProxy {
         client.removeCallBack(message.getSerial());
       }
 
-      return future.get(10, TimeUnit.SECONDS);
+      return future != null ?  future.get(10, TimeUnit.SECONDS) : null;
     }
   }
 

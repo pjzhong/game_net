@@ -39,7 +39,7 @@ public class CrossClientTest {
   }
 
   @AfterAll
-  public static void close() {
+  public static void close() throws Exception {
     local.close();
     cross.close();
 

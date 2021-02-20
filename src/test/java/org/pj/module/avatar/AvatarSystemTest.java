@@ -25,7 +25,7 @@ public class AvatarSystemTest {
   }
 
   @AfterAll
-  public static void close() {
+  public static void close() throws Exception {
     boot.getGameCtx().close();
     boot.getSpringCtx().close();
   }

@@ -44,7 +44,7 @@ public class NettyTcpClient implements AutoCloseable {
     bootstrap.handler(handler);
     channel = bootstrap.connect(address).sync().await().channel();
     if (channel != null && channel.isActive()) {
-      logger.info("connected to {}", channel.remoteAddress());
+      logger.info("local {} connected to {}", channel.localAddress(), channel.remoteAddress());
     } else {
       logger.info("fail to connect {}", address);
     }

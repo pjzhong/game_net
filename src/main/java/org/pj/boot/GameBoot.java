@@ -17,7 +17,7 @@ public class GameBoot {
   private GameBoot() {
   }
 
-  public GameBoot(SpringGameContext gameCtx,
+  private GameBoot(SpringGameContext gameCtx,
       AnnotationConfigApplicationContext springCtx) {
     this.gameCtx = gameCtx;
     this.springCtx = springCtx;

@@ -6,12 +6,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SpringBootCommand implements CommandLineRunner {
+public class GameBootRun implements CommandLineRunner {
 
   private SpringGameContext gameContext;
 
   @Autowired
-  public SpringBootCommand(SpringGameContext gameContext) {
+  public GameBootRun(SpringGameContext gameContext) {
     this.gameContext = gameContext;
   }
 

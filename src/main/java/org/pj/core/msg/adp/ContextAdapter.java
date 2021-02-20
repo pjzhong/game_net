@@ -39,18 +39,7 @@ public class ContextAdapter implements IAdapter<Object> {
   }
 
   public boolean isContextField(Class<?> clazz) {
-    Field f = contextFields.get(clazz);
-    if (f != null) {
-      return true;
-    }
-
-    for (Class<?> c : contextFields.keySet()) {
-      if (c.isAssignableFrom(clazz)) {
-        return true;
-      }
-    }
-
-    return false;
+    return contextFields.containsKey(clazz);
   }
 
   @Override

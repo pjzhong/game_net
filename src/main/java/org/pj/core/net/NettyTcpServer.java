@@ -5,11 +5,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelOption;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import org.pj.common.NamedThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +25,8 @@ public class NettyTcpServer implements AutoCloseable {
 
   public void startUp(ChannelHandler handler) throws Exception {
     bootstrap = new ServerBootstrap();
-    NioEventLoopGroup boss = new NioEventLoopGroup(1, new NamedThreadFactory("svr-boss"));
-    NioEventLoopGroup worker = new NioEventLoopGroup(0,
-        new NamedThreadFactory("svr-worker"));
 
-    bootstrap.group(boss, worker);
+    bootstrap.group(ThreadCommon.BOSS, ThreadCommon.WORKER);
     bootstrap.channel(NioServerSocketChannel.class);
     bootstrap.option(ChannelOption.SO_BACKLOG, 1024);
     bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
@@ -58,7 +53,5 @@ public class NettyTcpServer implements AutoCloseable {
       return;
     }
     channel.close();
-    bootstrap.config().group().shutdownGracefully();
-    bootstrap.config().childGroup().shutdownGracefully();
   }
 }

@@ -53,14 +53,6 @@ public class EventBusTest {
     gameContext.fireEvent(ADD_EVENT, 1);
     Assertions.assertEquals(testSystem.number, 2);
 
-    gameContext.asyncFireEvent(INIT_EVENT, 1);
-    TimeUnit.MILLISECONDS.sleep(100);
-    Assertions.assertEquals(testSystem.number, 1);
-
-    gameContext.asyncFireEvent(ADD_EVENT, 1);
-    TimeUnit.MILLISECONDS.sleep(100);
-    Assertions.assertEquals(testSystem.number, 2);
-
     gameContext.close();
     localBoot.getSpringCtx().close();
   }

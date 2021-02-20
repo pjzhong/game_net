@@ -15,12 +15,12 @@ import org.springframework.context.annotation.FilterType;
 @SpringBootApplication
 @ComponentScan(excludeFilters = @Filter(type = FilterType.REGEX,
     pattern = "org.pj.boot.*"))
-public class Example {
+public class SpringBootRun {
 
   public static void main(String[] args) {
     boolean cross = Arrays.asList(args).contains("cross");
     List<Class> classList = new ArrayList<>();
-    classList.add(Example.class);
+    classList.add(SpringBootRun.class);
     if (cross) {
       classList.add(CrossServerConfig.class);
     } else {
