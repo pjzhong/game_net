@@ -39,6 +39,7 @@ public class HelloFacade {
 
   @Packet(3)
   public HelloWorld echoHelloWorld(HelloWorld world) {
+    logger.info(world.getStr());
     return world;
   }
 

@@ -12,6 +12,10 @@ public class GameRunnableHandler implements EventHandler<GameRunnable> {
 
   @Override
   public void onEvent(GameRunnable event, long sequence, boolean endOfBatch) throws Exception {
-    event.run();
+    try {
+      event.run();
+    } finally {
+      event.clear();
+    }
   }
 }

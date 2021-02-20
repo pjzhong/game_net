@@ -31,4 +31,9 @@ public class GameRunnable implements Runnable {
     this.runnable = runnable;
     return this;
   }
+
+  public void clear() {
+    this.name = null;
+    this.runnable = null;
+  }
 }
