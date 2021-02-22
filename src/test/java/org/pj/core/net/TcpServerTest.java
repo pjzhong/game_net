@@ -43,7 +43,7 @@ public class TcpServerTest {
         }));
 
     CountDownLatch latch = new CountDownLatch(1);
-    WebSocketClient client = new ExampleWebSocketClient(new URI("ws://127.0.0.1:8080"), latch) {
+    WebSocketClient client = new ExampleWebSocketClient(new URI("ws://127.0.0.1:8080")) {
       @Override
       public void onMessage(ByteBuffer bytes) {
         try {

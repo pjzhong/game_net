@@ -23,7 +23,6 @@ import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
 import org.pj.core.net.init.WebSocketServerHandlerInitializer;
-import org.pj.protocols.hello.HelloFacade;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
 
 public class WebSocketMessageDispatcherTest {
@@ -150,7 +149,7 @@ public class WebSocketMessageDispatcherTest {
     Message request = Message.newBuilder().setModule(4)
         .build();
 
-    int size = 100, senders = 8, total = size * senders;
+    int size = 100, senders = 64, total = size * senders;
     CountDownLatch latch = new CountDownLatch(total);
     int[] result = new int[total + 1];
     ExampleWebSocketClient[] clients = new ExampleWebSocketClient[senders];
@@ -167,12 +166,11 @@ public class WebSocketMessageDispatcherTest {
       });
     }
 
-    ForkJoinPool pool = ForkJoinPool.commonPool();
-    Random random = ThreadLocalRandom.current();
-    for (int i = 0, loop = size * senders, limits = senders - 1; i < loop; i++) {
-      int h = random.nextInt();
-      int idx = (h ^ (h >>> 16)) & limits;
-      pool.execute(() -> clients[idx].send(request.toByteArray()));
+    byte[] packet = request.toByteArray();
+    for (int i = 0; i < size; i++) {
+      for(int s= 0; s < senders; s++) {
+        clients[s].send(packet);
+      }
     }
 
     assertTrue(latch.await(10, TimeUnit.SECONDS), "Count TimeOut");

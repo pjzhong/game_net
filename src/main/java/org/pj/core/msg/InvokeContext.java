@@ -56,7 +56,7 @@ public class InvokeContext implements Runnable {
 
       long cost = System.currentTimeMillis() - start;
       if (100 < cost) {
-        logger.info("cid [{}] handle message [{}] cost [{}ms]", channel.id(), request.getModule(),
+        logger.debug("cid [{}] handle message [{}] cost [{}ms]", channel.id(), request.getModule(),
             cost);
       }
     } catch (Exception e) {

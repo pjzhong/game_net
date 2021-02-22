@@ -26,7 +26,7 @@ public class IAdapterTest {
 
     assertTrue(adapter.isContextField(Message.class));
     assertTrue(adapter.isContextField(Channel.class));
-    assertTrue(adapter.isContextField(NioSocketChannel.class));
+    assertTrue(adapter.isContextField(Channel.class));
   }
 
 

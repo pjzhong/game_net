@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.pj.common.NamedThreadFactory;
 import org.pj.core.msg.MessageProto.Message;
@@ -26,7 +27,6 @@ import org.pj.core.net.ExampleTcpClient;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
-import org.pj.protocols.hello.HelloFacade;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
 
 public class MessageDispatcherTest {
@@ -58,12 +58,16 @@ public class MessageDispatcherTest {
     tcpServer = null;
   }
 
-  @Test
+  @RepeatedTest(10)
   public void helloWorldTest() throws Exception {
 
-    Message request = Message.newBuilder().setModule(1).build();
+    Message request = Message.newBuilder().setModule(2)
+        .setBody(ByteString.copyFromUtf8("HelloWorld")).build();
+    Message request1 = Message.newBuilder().setModule(2)
+        .setBody(ByteString.copyFromUtf8("HelloWorld1")).build();
 
-    int loop = 5;
+
+    int loop = 100;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleTcpClient client = new ExampleTcpClient("localhost", 8080,
         new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
@@ -73,17 +77,29 @@ public class MessageDispatcherTest {
             latch.countDown();
           }
         }));
+    ExampleTcpClient client1 = new ExampleTcpClient("localhost", 8080,
+        new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
+          @Override
+          public void channelRead0(ChannelHandlerContext ctx, Message msg) {
+            assertEquals(msg.getBody().toStringUtf8(), "HelloWorld1");
+            latch.countDown();
+          }
+        }));
 
+    byte[] pack = request.toByteArray();
+    byte[] pack1 = request1.toByteArray();
     for (int i = 0; i < loop; i++) {
-      client.sendMsg(request);
+      client.sendMsg(pack);
+      client1.sendMsg(pack1);
     }
 
-    assertTrue(latch.await(300, TimeUnit.MILLISECONDS), "HelloWorld Failed");
+    assertTrue(latch.await(1, TimeUnit.MINUTES), "HelloWorld Failed");
+    client.close();
+    client1.close();
   }
 
   @Test
   public void echoContextTest() throws Exception {
-
     Message request = Message.newBuilder().setModule(2).setBody(ByteString.copyFromUtf8("echo"))
         .build();
 

@@ -1,4 +1,4 @@
-package org.pj.protocols.hello;
+package org.pj.core.msg;
 
 
 import com.google.protobuf.ByteString;
@@ -6,7 +6,6 @@ import io.netty.channel.Channel;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.pj.core.msg.MessageProto.Message;
-import org.pj.core.msg.Packet;
 import org.pj.protocols.Facade;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
 import org.slf4j.Logger;

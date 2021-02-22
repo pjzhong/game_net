@@ -23,15 +23,16 @@ import org.slf4j.LoggerFactory;
 public class MessageDispatcher implements AutoCloseable {
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  private final Map<Integer, HandlerInfo> handlers;
-  private final AtomicInteger msgCount;
+  /** 协议号 -> 处理器 **/
+  private Map<Integer, HandlerInfo> handlers;
+  /** 线程池 */
   private DisruptorThreadPool disruptorPool;
+  /** 运行标记 */
   private volatile boolean work;
 
   public MessageDispatcher(int threadSize) {
     disruptorPool = new DisruptorThreadPool(threadSize, 4096,
         new NamedThreadFactory("game-disruptor-thread"));
-    msgCount = new AtomicInteger();
     handlers = new ConcurrentHashMap<>();
     work = true;
   }
@@ -39,7 +40,6 @@ public class MessageDispatcher implements AutoCloseable {
   public Map<Integer, HandlerInfo> getHandlers() {
     return handlers;
   }
-
 
   public void channelActive(ChannelHandlerContext ctx) {
     disruptorPool.bind(ctx.channel());
@@ -49,12 +49,8 @@ public class MessageDispatcher implements AutoCloseable {
   }
 
   public boolean add(Channel channel, Message msg) {
-    if (!work || msg == null || channel == null) {
+    if (!work) {
       return false;
-    }
-
-    int count = msgCount.get();
-    if (count > 100) {
     }
 
     HandlerInfo handler = handlers.get(msg.getModule());
@@ -65,7 +61,6 @@ public class MessageDispatcher implements AutoCloseable {
       return false;
     }
 
-    // TODO 用了，但是效果不明显
     InvokeContext invoker = InvokeContext.FACTORY.get();
     invoker.setValue(channel, msg, handler);
     disruptorPool.exec(channel, invoker);
@@ -136,11 +131,6 @@ public class MessageDispatcher implements AutoCloseable {
   public void close() {
     try {
       work = false;
-      while (0 < msgCount.get()) {
-        logger.info("stopping dispatcher, msgCount:{}", msgCount.get());
-        TimeUnit.SECONDS.sleep(1);
-      }
-
       disruptorPool.shutdown();
     } catch (Exception e) {
       logger.info("stooping dispatcher error", e);

@@ -40,21 +40,4 @@ public class EventBusTest {
     Assertions.assertEquals(testSystem.number, 2);
   }
 
-  @Test
-  public void withGameContext() throws Exception {
-    GameBoot localBoot = GameBoot.start();
-    SpringGameContext gameContext = localBoot.getGameCtx();
-
-    EventTestSystem testSystem = gameContext.getBean(EventTestSystem.class);
-
-    gameContext.fireEvent(INIT_EVENT, 1);
-    Assertions.assertEquals(testSystem.number, 1);
-
-    gameContext.fireEvent(ADD_EVENT, 1);
-    Assertions.assertEquals(testSystem.number, 2);
-
-    gameContext.close();
-    localBoot.getSpringCtx().close();
-  }
-
 }

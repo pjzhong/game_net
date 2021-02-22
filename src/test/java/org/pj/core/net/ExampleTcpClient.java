@@ -52,6 +52,12 @@ public class ExampleTcpClient {
     channel.writeAndFlush(buf, channel.voidPromise());
   }
 
+  public void sendMsg(byte[] packet) {
+    ByteBuf buf = channel.alloc().buffer();
+    buf.writeBytes(packet);
+    channel.writeAndFlush(buf);
+  }
+
   private void initBootstrap(EventLoopGroup loopGroup) throws InterruptedException {
     bootstrap = new Bootstrap()
         .group(loopGroup)
