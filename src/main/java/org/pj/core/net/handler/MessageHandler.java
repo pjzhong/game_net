@@ -5,8 +5,8 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.pj.core.msg.Message;
 import org.pj.core.msg.MessageDispatcher;
-import org.pj.core.msg.MessageProto.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

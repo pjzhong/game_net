@@ -40,10 +40,8 @@ public class ExampleTcpClient {
     initBootstrap(group);
   }
 
-  public void sendMsg(String msg) {
-    ByteBuf buf = channel.alloc().buffer();
-    buf.writeBytes(msg.getBytes(StandardCharsets.UTF_8));
-    channel.writeAndFlush(buf, channel.voidPromise());
+  public void sendMsg(Object msg) {
+    channel.writeAndFlush(msg, channel.voidPromise());
   }
 
   public void sendMsg(MessageLite packet) {

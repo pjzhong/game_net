@@ -7,7 +7,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import java.net.InetSocketAddress;
-import org.pj.core.msg.MessageProto.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,7 @@ public class NettyTcpClient implements AutoCloseable {
     }
   }
 
-  public boolean sendMessage(Message msg) {
+  public boolean sendMessage(Object msg) {
     if (noConnected()) {
       return false;
     }

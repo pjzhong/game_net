@@ -8,13 +8,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.ObjectUtils;
 import org.pj.common.NamedThreadFactory;
 import org.pj.core.framework.disruptor.DisruptorThreadPool;
 import org.pj.core.msg.HandlerInfo.ParameterInfo;
-import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.adp.ContextAdapter;
 import org.pj.core.msg.adp.ProtobufAdapter;
 import org.slf4j.Logger;
@@ -68,11 +65,11 @@ public class MessageDispatcher implements AutoCloseable {
   }
 
   private Message NoModuleResponse(Message message) {
-    return Message.newBuilder()
-        .setSerial(message.getSerial())
+    return new Message()
+        .setOpt(message.getOpt())
         .setModule(message.getModule() < 0 ? message.getModule() : -message.getModule())
-        .setStat(-1)//TODO 规范错误码
-        .build();
+        .setStates(-1)//TODO 规范错误码
+        ;
   }
 
   public void registerHandler(Object handler) {

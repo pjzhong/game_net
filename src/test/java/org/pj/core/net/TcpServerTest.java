@@ -1,19 +1,19 @@
 package org.pj.core.net;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.java_websocket.client.WebSocketClient;
 import org.junit.jupiter.api.Test;
-import org.pj.core.msg.MessageProto.Message;
+import org.pj.core.msg.Message;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
 import org.pj.core.net.init.WebSocketServerHandlerInitializer;
 
@@ -21,12 +21,11 @@ public class TcpServerTest {
 
   @Test
   public void webSocketTest() throws Exception {
-    Message message = Message.newBuilder()
-        .setVersion(1)
+    Message message = Message.valueOf()
         .setModule(1)
-        .setStat(200)
-        .setSerial(0)
-        .setBody(ByteString.copyFromUtf8("Hello, WebSocket World!!!!")).build();
+        .setStates(200)
+        .setOpt(0)
+        .setBody("Hello, WebSocket World!!!!".getBytes(StandardCharsets.UTF_8));
 
     NettyTcpServer server = new NettyTcpServer(8080);
     server
@@ -46,12 +45,8 @@ public class TcpServerTest {
     WebSocketClient client = new ExampleWebSocketClient(new URI("ws://127.0.0.1:8080")) {
       @Override
       public void onMessage(ByteBuffer bytes) {
-        try {
-          Message echoMessage = Message.parseFrom(bytes);
-          assertEquals(message, echoMessage);
-        } catch (InvalidProtocolBufferException e) {
-          e.printStackTrace();
-        }
+        Message echoMessage = Message.readFrom(bytes);
+        assertArrayEquals(message.getBody(), echoMessage.getBody());
         latch.countDown();
       }
     };
@@ -67,12 +62,11 @@ public class TcpServerTest {
 
   @Test
   public void socketTest() throws Exception {
-    Message message = Message.newBuilder()
-        .setVersion(1)
+    Message message = Message.valueOf()
         .setModule(1)
-        .setStat(200)
-        .setSerial(0)
-        .setBody(ByteString.copyFromUtf8("Hello, Socket World!!!!")).build();
+        .setStates(200)
+        .setOpt(0)
+        .setBody("Hello, Socket World!!!!".getBytes(StandardCharsets.UTF_8));
 
     NettyTcpServer server = new NettyTcpServer(8080);
     server.startUp(new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
@@ -92,8 +86,7 @@ public class TcpServerTest {
         new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
           @Override
           public void channelRead0(ChannelHandlerContext ctx, Message msg) {
-            System.out.println(msg.getBody().toStringUtf8());
-            assertEquals(message, msg);
+            assertArrayEquals(message.getBody(), msg.getBody());
             latch.countDown();
           }
         }));

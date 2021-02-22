@@ -3,7 +3,7 @@ package org.pj.core.framework.cross;
 import com.google.protobuf.MessageLite;
 import com.google.protobuf.Parser;
 import java.lang.reflect.Method;
-import org.pj.core.msg.MessageProto.Message;
+import org.pj.core.msg.Message;
 import org.pj.core.msg.adp.ProtobufAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class ProtoBufCallBackAdapter implements SocketCallback<Message> {
     final Class<?> returnType = method.getReturnType();
     Object result = null;
     try {
-      if (o.getStat() != 200) {
+      if (o.getStates() != 200) {
         callback.acceptErr(o);
       } else {
         if (MessageLite.class.isAssignableFrom(returnType)) {

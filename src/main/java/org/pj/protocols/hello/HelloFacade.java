@@ -1,11 +1,12 @@
-package org.pj.core.msg;
+package org.pj.protocols.hello;
 
 
 import com.google.protobuf.ByteString;
 import io.netty.channel.Channel;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.pj.core.msg.MessageProto.Message;
+import org.pj.core.msg.Message;
+import org.pj.core.msg.Packet;
 import org.pj.protocols.Facade;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class HelloFacade {
 
   @Packet(1)
   public Message echoHelloWorld() {
-    return Message.newBuilder().setBody(ByteString.copyFromUtf8("HelloWorld")).build();
+    return Message.valueOf().setBody(ByteString.copyFromUtf8("HelloWorld").toByteArray());
   }
 
   @Packet(2)

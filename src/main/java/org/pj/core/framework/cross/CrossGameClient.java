@@ -12,11 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.pj.core.framework.SpringGameContext;
-import org.pj.core.msg.MessageProto.Message;
+import org.pj.core.msg.Message;
 import org.pj.core.net.NettyTcpClient;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
 import org.pj.core.net.init.WebSocketClientHandlerInitializer;
@@ -82,7 +81,7 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
     }
   }
 
-  public boolean sendMessage(Message msg) {
+  public boolean sendMessage(Object msg) {
     return client.sendMessage(msg);
   }
 
@@ -111,7 +110,7 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
 
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
-    SocketCallback<Object> callback = callbacks.remove(msg.getSerial());
+    SocketCallback<Object> callback = callbacks.remove(msg.getOpt());
     if (callback != null) { //TODO 执行回调
       //TODO 增加回调执行
       context.getDispatcher().add(ctx.channel(), msg);

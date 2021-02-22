@@ -32,11 +32,11 @@ public class EventBusTest {
     bus.registerEvent(testSystem);
 
     bus.asyncFireEvent(INIT_EVENT, 1);
-    TimeUnit.MILLISECONDS.sleep(1);
+    TimeUnit.MILLISECONDS.sleep(10);
     Assertions.assertEquals(testSystem.number, 1);
 
     bus.asyncFireEvent(ADD_EVENT, 1);
-    TimeUnit.MILLISECONDS.sleep(1);
+    TimeUnit.MILLISECONDS.sleep(10);
     Assertions.assertEquals(testSystem.number, 2);
   }
 

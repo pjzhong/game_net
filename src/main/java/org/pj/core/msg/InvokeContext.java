@@ -7,8 +7,6 @@ import io.netty.util.Recycler.Handle;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import org.pj.core.msg.MessageProto.Message;
-import org.pj.core.msg.MessageProto.Message.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,11 +70,9 @@ public class InvokeContext implements Runnable {
   }
 
   private Message sysErr(Message request) {
-    Message.Builder builder = Message.newBuilder();
-    fillState(builder, request);
-    return builder
-        .setStat(100)//TODO 规范化 消息状态码
-        .build();
+    Message msg = new Message();
+    fillState(msg, request);
+    return msg.setStates(100);//TODO 规范化 消息状态码
   }
 
   private Message doRun(InvokeContext context) throws Exception {
@@ -93,37 +89,35 @@ public class InvokeContext implements Runnable {
 
     Object result = method.invoke(handler, params);
 
-    Builder builder = Message.newBuilder();
-    if (result instanceof Message) {
-      builder.mergeFrom((Message) result);
+    Message builder = new Message();
+    if(result instanceof Message) {
+      builder.setBody(((Message) result).getBody());
     } else if (result instanceof MessageLite) {
       builder
-          .mergeFrom(context.getMessage()) //TODO 这个Merge很疑惑
-          .setBody(((MessageLite) result).toByteString());
+          .setBody(((MessageLite) result).toByteArray());
     } else {
       logger.error("module {} can't return type {}", request.getModule(),
           result.getClass().getName());
     }
 
     fillState(builder, request);
-    return builder.build();
+    return builder;
   }
 
-  private Builder fillState(Message.Builder builder, Message request) {
+  private Message fillState(Message msg, Message request) {
     int responseType = request.getModule();
     if (0 < responseType) {
       responseType = -responseType;
     }
 
-    builder
-        .setSerial(request.getSerial())
+    msg
+        .setOpt(request.getOpt())
         .setModule(responseType);
-    if (builder.getStat() == 0) {
-      builder.setStat(200);
+    if (request.getStates() == 0) {
+      msg.setStates(200);
     }
-    return builder;
+    return msg;
   }
-
 
   public Channel getChannel() {
     return channel;
