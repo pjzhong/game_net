@@ -54,16 +54,18 @@ public class InvokeContext implements Runnable {
 
       long cost = System.currentTimeMillis() - start;
       if (100 < cost) {
-        logger.debug("cid [{}] handle message [{}] cost [{}ms]", channel.id(), request.getModule(),
+        logger.debug("cid [{}] handle message [{}] cost [{}ms]", channel.remoteAddress(),
+            request.getModule(),
             cost);
       }
     } catch (Exception e) {
       channel.write(sysErr(request));
       logger
-          .error(String.format("cid [%s] handle [%s] error", channel.id(), request.getModule()),
+          .error(String
+                  .format("cid [%s] handle [%s] error", channel.remoteAddress(), request.getModule()),
               e);
     } finally {
-      channel.eventLoop().execute(channel::flush);
+      channel.flush();
       Arrays.fill(info.paramArray(), null);
       recycle();
     }
@@ -72,7 +74,7 @@ public class InvokeContext implements Runnable {
   private Message sysErr(Message request) {
     Message msg = new Message();
     fillState(msg, request);
-    return msg.setStates(100);//TODO 规范化 消息状态码
+    return msg.setStates(SystemStates.SYSTEM_ERR);//TODO 规范化 消息状态码
   }
 
   private Message doRun(InvokeContext context) throws Exception {
@@ -90,7 +92,7 @@ public class InvokeContext implements Runnable {
     Object result = method.invoke(handler, params);
 
     Message builder = new Message();
-    if(result instanceof Message) {
+    if (result instanceof Message) {
       builder.setBody(((Message) result).getBody());
     } else if (result instanceof MessageLite) {
       builder
@@ -104,19 +106,17 @@ public class InvokeContext implements Runnable {
     return builder;
   }
 
-  private Message fillState(Message msg, Message request) {
+  private void fillState(Message msg, Message request) {
     int responseType = request.getModule();
     if (0 < responseType) {
       responseType = -responseType;
     }
 
-    msg
-        .setOpt(request.getOpt())
+    msg.setOpt(request.getOpt())
         .setModule(responseType);
     if (request.getStates() == 0) {
-      msg.setStates(200);
+      msg.setStates(SystemStates.OK);
     }
-    return msg;
   }
 
   public Channel getChannel() {

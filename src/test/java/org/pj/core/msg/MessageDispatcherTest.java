@@ -70,7 +70,7 @@ public class MessageDispatcherTest {
 
 
     int loop = 100;
-    CountDownLatch latch = new CountDownLatch(loop);
+    CountDownLatch latch = new CountDownLatch(loop * 2);
     ExampleTcpClient client = new ExampleTcpClient("localhost", 8080,
         new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
           @Override

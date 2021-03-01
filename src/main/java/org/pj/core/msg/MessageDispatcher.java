@@ -68,7 +68,7 @@ public class MessageDispatcher implements AutoCloseable {
     return new Message()
         .setOpt(message.getOpt())
         .setModule(message.getModule() < 0 ? message.getModule() : -message.getModule())
-        .setStates(-1)//TODO 规范错误码
+        .setStates(SystemStates.MODULE_404)
         ;
   }
 
