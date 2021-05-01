@@ -5,9 +5,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.Packet;
 import org.slf4j.Logger;
@@ -18,14 +16,14 @@ public class CrossSendProxy {
   private Logger logger = LoggerFactory.getLogger(this.getClass());
   private Map<Class<?>, Object> ivkCaches;
   private InvocationHandler invoker;
-  private ThreadLocal<ResultCallBack<?>> currentCallBack = new ThreadLocal<>();
+  private ThreadLocal<SocketCallback<?>> currentCallBack = new ThreadLocal<>();
 
   public CrossSendProxy(CrossGameClient client) {
     this.invoker = new SendProxyInvoker(client);
     this.ivkCaches = new ConcurrentHashMap<>();
   }
 
-  public <T, R> T asynProxy(Class<T> clz, ResultCallBack<R> callback) {
+  public <T, R> T asynProxy(Class<T> clz, SocketCallback<R> callback) {
     T t = createProxy(clz);
     currentCallBack.set(callback);
     return t;
@@ -76,24 +74,21 @@ public class CrossSendProxy {
       }
 
       Message message = builder.build();
-      ResultCallBack<?> callback = currentCallBack.get();
-      SocketCallback<?> clientCallBack = null;
-      CompletableFuture<?> future = null;
-      currentCallBack.remove();
-      if (callback == null) {// TODO 阻塞调用
-        future = new CompletableFuture<>();
-        clientCallBack = new ProtoBufCallBackAdapter(method, new CompleteSocketCallBack(future));
-      } else {
+      SocketCallback<?> callback = currentCallBack.get();
+      if(callback != null) {
+        SocketCallback<?> clientCallBack;
+        currentCallBack.remove();
         clientCallBack = new ProtoBufCallBackAdapter(method, callback);
+
+        client.addSocketCallback(message.getSerial(), clientCallBack);
+        boolean suc = client.sendMessage(message);
+        if (!suc) {
+          client.removeCallBack(message.getSerial());
+        }
       }
 
-      client.addSocketCallback(message.getSerial(), clientCallBack);
-      boolean suc = client.sendMessage(message);
-      if (!suc) {
-        client.removeCallBack(message.getSerial());
-      }
 
-      return future != null ?  future.get(10, TimeUnit.SECONDS) : null;
+      return null;
     }
   }
 

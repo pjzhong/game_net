@@ -61,7 +61,7 @@ public class GameContextTest {
         .setSerial(0)
         .setBody(HelloWorld.newBuilder().setStr("Hello World").build().toByteString()).build();
 
-    int loop = 10000;
+    int loop = 100;
     CountDownLatch latch = new CountDownLatch(loop * 2);
     WebSocketClient client1 = new ExampleWebSocketClient(new URI("ws://127.0.0.1:8080"), latch) {
       @Override

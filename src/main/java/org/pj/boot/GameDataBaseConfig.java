@@ -5,7 +5,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 import org.pj.core.event.EventBus;
 import org.pj.core.framework.SpringGameContext;
-import org.pj.core.msg.MessageDispatcher;
 import org.pj.core.net.NettyTcpServer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -26,8 +25,6 @@ public class GameDataBaseConfig {
     SpringGameContext gameContext = new SpringGameContext(context);
     gameContext.setEventBus(new EventBus());
     gameContext.setTcpServer(tcpServer);
-    gameContext
-        .setDispatcher(new MessageDispatcher(Runtime.getRuntime().availableProcessors() * 2));
     return gameContext;
   }
 

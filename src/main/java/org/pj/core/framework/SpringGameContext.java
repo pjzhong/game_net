@@ -7,10 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinPool.ForkJoinWorkerThreadFactory;
-import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.stream.Collectors;
 import javax.annotation.Priority;
 import org.apache.commons.lang3.ArrayUtils;
@@ -40,6 +36,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   private MessageDispatcher dispatcher;
   private NettyTcpServer tcpServer;
   private GenericApplicationContext context;
+  private DisruptorThreadPool threadPool;
   private volatile boolean working;
 
   public SpringGameContext(GenericApplicationContext ctx) {
@@ -55,6 +52,10 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     return tcpServer;
   }
 
+  public DisruptorThreadPool getThreadPool() {
+    return threadPool;
+  }
+
   public void setEventBus(EventBus eventBus) {
     this.eventBus = eventBus;
   }
@@ -63,15 +64,13 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     this.context = context;
   }
 
-  public void setDispatcher(MessageDispatcher dispatcher) {
-    this.dispatcher = dispatcher;
-  }
-
   public void setTcpServer(NettyTcpServer tcpServer) {
     this.tcpServer = tcpServer;
   }
 
   public void init() {
+    threadPool = new DisruptorThreadPool();
+    dispatcher = new MessageDispatcher(threadPool);
     initSystem();
   }
 
@@ -110,7 +109,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     } else if (pri.value() < 1) {
       return 1;
     } else {
-      return pri.value() > 10 ? 10 : pri.value();
+      return Math.min(pri.value(), 10);
     }
   }
 

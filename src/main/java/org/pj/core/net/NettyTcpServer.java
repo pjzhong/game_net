@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public class NettyTcpServer implements AutoCloseable {
 
   private final int port;
-  private Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private ServerBootstrap bootstrap;
   private Channel channel;
 

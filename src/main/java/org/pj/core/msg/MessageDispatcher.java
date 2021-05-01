@@ -28,8 +28,21 @@ public class MessageDispatcher implements AutoCloseable {
   private DisruptorThreadPool disruptorPool;
   private volatile boolean work;
 
+  public MessageDispatcher(DisruptorThreadPool pool) {
+    this.disruptorPool = pool;
+    msgCount = new AtomicInteger();
+    handlers = new ConcurrentHashMap<>();
+    work = true;
+  }
+
+  /**
+   * 测试环境用
+   *
+   * @param threadSize 线程数
+   * @since 2021年05月01日 10:04:49
+   */
   public MessageDispatcher(int threadSize) {
-    disruptorPool = new DisruptorThreadPool(threadSize, 4096,
+    disruptorPool = new DisruptorThreadPool(Runtime.getRuntime().availableProcessors() / 2, 4096,
         new NamedThreadFactory("game-disruptor-thread"));
     msgCount = new AtomicInteger();
     handlers = new ConcurrentHashMap<>();
@@ -45,7 +58,7 @@ public class MessageDispatcher implements AutoCloseable {
     disruptorPool.bind(ctx.channel());
   }
 
-  public void channelInactive(ChannelHandlerContext ctx){
+  public void channelInactive(ChannelHandlerContext ctx) {
   }
 
   public boolean add(Channel channel, Message msg) {
@@ -140,8 +153,6 @@ public class MessageDispatcher implements AutoCloseable {
         logger.info("stopping dispatcher, msgCount:{}", msgCount.get());
         TimeUnit.SECONDS.sleep(1);
       }
-
-      disruptorPool.shutdown();
     } catch (Exception e) {
       logger.info("stooping dispatcher error", e);
     }

@@ -29,9 +29,9 @@ public class InvokeContext implements Runnable {
     }
   };
 
+  private final transient Handle<InvokeContext> recycleHandle;
   private Channel channel;
   private Message message;
-  private transient Handle<InvokeContext> recycleHandle;
   private transient HandlerInfo info;
   private transient long start;
 

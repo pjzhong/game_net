@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Parser;
 import io.netty.channel.Channel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import org.junit.jupiter.api.Test;
 import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.adp.ContextAdapter;
@@ -26,7 +25,7 @@ public class IAdapterTest {
 
     assertTrue(adapter.isContextField(Message.class));
     assertTrue(adapter.isContextField(Channel.class));
-    assertTrue(adapter.isContextField(NioSocketChannel.class));
+    assertTrue(adapter.isContextField(Channel.class));
   }
 
 

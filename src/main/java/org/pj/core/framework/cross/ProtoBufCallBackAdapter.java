@@ -13,11 +13,11 @@ public class ProtoBufCallBackAdapter implements SocketCallback<Message> {
   private static Logger logger = LoggerFactory.getLogger(SocketCallback.class);
 
   private final Method method;
-  private final ResultCallBack<Object> callback;
+  private final SocketCallback<Object> callback;
 
-  public ProtoBufCallBackAdapter(Method method, ResultCallBack<?> callback) {
+  public ProtoBufCallBackAdapter(Method method, SocketCallback<?> callback) {
     this.method = method;
-    this.callback = (ResultCallBack<Object>) callback;
+    this.callback = (SocketCallback<Object>) callback;
   }
 
   @Override
@@ -26,7 +26,7 @@ public class ProtoBufCallBackAdapter implements SocketCallback<Message> {
     Object result = null;
     try {
       if (o.getStat() != 200) {
-        callback.acceptErr(o);
+        logger.error("model {} return state {}", o.getModule(), o.getStat());
       } else {
         if (MessageLite.class.isAssignableFrom(returnType)) {
           ProtobufAdapter adapter = ProtobufAdapter.getInstance();
@@ -38,13 +38,11 @@ public class ProtoBufCallBackAdapter implements SocketCallback<Message> {
         if (result != null || returnType == Void.TYPE) {
           callback.accept(result);
         } else {
-          logger.warn("Can't not parse %s of method %s", returnType.getName(), getFullMethodName());
+          logger.warn("Can't not parse {} of method {}", returnType.getName(), getFullMethodName());
         }
       }
     } catch (Exception e) {
-      logger.error(String.format("calling %s onSuccess error", getFullMethodName()), e);
-      callback.onException(e);
-
+      logger.error("calling {} onSuccess error", getFullMethodName(), e);
     }
   }
 
