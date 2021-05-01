@@ -5,7 +5,6 @@ import com.lmax.disruptor.dsl.Disruptor;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.pj.common.NamedThreadFactory;
 
@@ -54,10 +53,15 @@ public class DisruptorThreadPool {
 
 
   public void exec(Channel o, Runnable runnable) {
-    Attribute<Integer> idxAttr = poolIdx(o);
-    Disruptor<GameRunnable> disruptor = pools[idxAttr.get() == null ? ThreadLocalRandom.current()
-        .nextInt(pools.length) : idxAttr.get()];
+    Disruptor<GameRunnable> disruptor = pools[bind(o)];
     disruptor.getRingBuffer().publishEvent(RunnableTranslator.INSTANCE, runnable);
+  }
+
+  public void exec(int idx, String name, Runnable runnable) {
+    pools[idx].publishEvent((event, sequence, r, n) -> {
+      event.setRunnable(r);
+      event.setName(n);
+    }, runnable, name);
   }
 
   private Attribute<Integer> poolIdx(Channel o) {
@@ -65,7 +69,7 @@ public class DisruptorThreadPool {
   }
 
   public void shutdown() throws InterruptedException {
-    for (Disruptor e : pools) {
+    for (Disruptor<GameRunnable> e : pools) {
       e.shutdown();
     }
   }

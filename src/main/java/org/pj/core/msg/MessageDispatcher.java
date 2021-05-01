@@ -8,10 +8,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.ObjectUtils;
 import org.pj.common.NamedThreadFactory;
 import org.pj.core.framework.disruptor.DisruptorThreadPool;
 import org.pj.core.msg.HandlerInfo.ParameterInfo;
+import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.adp.ContextAdapter;
 import org.pj.core.msg.adp.ProtobufAdapter;
 import org.slf4j.Logger;
@@ -20,16 +23,28 @@ import org.slf4j.LoggerFactory;
 public class MessageDispatcher implements AutoCloseable {
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
-  /** 协议号 -> 处理器 **/
-  private Map<Integer, HandlerInfo> handlers;
-  /** 线程池 */
+  private final Map<Integer, HandlerInfo> handlers;
+  private final AtomicInteger msgCount;
   private DisruptorThreadPool disruptorPool;
-  /** 运行标记 */
   private volatile boolean work;
 
+  public MessageDispatcher(DisruptorThreadPool pool) {
+    this.disruptorPool = pool;
+    msgCount = new AtomicInteger();
+    handlers = new ConcurrentHashMap<>();
+    work = true;
+  }
+
+  /**
+   * 测试环境用
+   *
+   * @param threadSize 线程数
+   * @since 2021年05月01日 10:04:49
+   */
   public MessageDispatcher(int threadSize) {
-    disruptorPool = new DisruptorThreadPool(threadSize, 4096,
+    disruptorPool = new DisruptorThreadPool(Runtime.getRuntime().availableProcessors() / 2, 4096,
         new NamedThreadFactory("game-disruptor-thread"));
+    msgCount = new AtomicInteger();
     handlers = new ConcurrentHashMap<>();
     work = true;
   }
@@ -38,16 +53,21 @@ public class MessageDispatcher implements AutoCloseable {
     return handlers;
   }
 
+
   public void channelActive(ChannelHandlerContext ctx) {
     disruptorPool.bind(ctx.channel());
   }
 
-  public void channelInactive(ChannelHandlerContext ctx){
+  public void channelInactive(ChannelHandlerContext ctx) {
   }
 
   public boolean add(Channel channel, Message msg) {
-    if (!work) {
+    if (!work || msg == null || channel == null) {
       return false;
+    }
+
+    int count = msgCount.get();
+    if (count > 100) {
     }
 
     HandlerInfo handler = handlers.get(msg.getModule());
@@ -58,6 +78,7 @@ public class MessageDispatcher implements AutoCloseable {
       return false;
     }
 
+    // TODO 用了，但是效果不明显
     InvokeContext invoker = InvokeContext.FACTORY.get();
     invoker.setValue(channel, msg, handler);
     disruptorPool.exec(channel, invoker);
@@ -65,11 +86,11 @@ public class MessageDispatcher implements AutoCloseable {
   }
 
   private Message NoModuleResponse(Message message) {
-    return new Message()
-        .setOpt(message.getOpt())
+    return Message.newBuilder()
+        .setSerial(message.getSerial())
         .setModule(message.getModule() < 0 ? message.getModule() : -message.getModule())
-        .setStates(SystemStates.MODULE_404)
-        ;
+        .setStat(-1)//TODO 规范错误码
+        .build();
   }
 
   public void registerHandler(Object handler) {
@@ -128,7 +149,10 @@ public class MessageDispatcher implements AutoCloseable {
   public void close() {
     try {
       work = false;
-      disruptorPool.shutdown();
+      while (0 < msgCount.get()) {
+        logger.info("stopping dispatcher, msgCount:{}", msgCount.get());
+        TimeUnit.SECONDS.sleep(1);
+      }
     } catch (Exception e) {
       logger.info("stooping dispatcher error", e);
     }

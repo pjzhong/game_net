@@ -5,10 +5,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import org.pj.core.msg.Message;
+import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.Packet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +16,14 @@ public class CrossSendProxy {
   private Logger logger = LoggerFactory.getLogger(this.getClass());
   private Map<Class<?>, Object> ivkCaches;
   private InvocationHandler invoker;
-  private ThreadLocal<ResultCallBack<?>> currentCallBack = new ThreadLocal<>();
+  private ThreadLocal<SocketCallback<?>> currentCallBack = new ThreadLocal<>();
 
   public CrossSendProxy(CrossGameClient client) {
     this.invoker = new SendProxyInvoker(client);
     this.ivkCaches = new ConcurrentHashMap<>();
   }
 
-  public <T, R> T asynProxy(Class<T> clz, ResultCallBack<R> callback) {
+  public <T, R> T asynProxy(Class<T> clz, SocketCallback<R> callback) {
     T t = createProxy(clz);
     currentCallBack.set(callback);
     return t;
@@ -62,38 +60,35 @@ public class CrossSendProxy {
             method.getName());
         return null;
       }
-      Message builder = Message.valueOf()
+      Message.Builder builder = Message.newBuilder()
           .setModule(packet.value())
-          .setOpt(client.genMsgId());
+          .setSerial(client.genMsgId());
       if (args != null) {
         for (Object o : args) {
           if (o instanceof MessageLite) {
             MessageLite lite = (MessageLite) o;
-            builder.setBody(lite.toByteArray());
+            builder.setBody(lite.toByteString());
             break;
           }
         }
       }
 
-      Message message = Message.valueOf();
-      ResultCallBack<?> callback = currentCallBack.get();
-      SocketCallback<?> clientCallBack = null;
-      CompletableFuture<?> future = null;
-      currentCallBack.remove();
-      if (callback == null) {// TODO 阻塞调用
-        future = new CompletableFuture<>();
-        clientCallBack = new ProtoBufCallBackAdapter(method, new CompleteSocketCallBack(future));
-      } else {
+      Message message = builder.build();
+      SocketCallback<?> callback = currentCallBack.get();
+      if(callback != null) {
+        SocketCallback<?> clientCallBack;
+        currentCallBack.remove();
         clientCallBack = new ProtoBufCallBackAdapter(method, callback);
+
+        client.addSocketCallback(message.getSerial(), clientCallBack);
+        boolean suc = client.sendMessage(message);
+        if (!suc) {
+          client.removeCallBack(message.getSerial());
+        }
       }
 
-      client.addSocketCallback(message.getOpt(), clientCallBack);
-      boolean suc = client.sendMessage(message);
-      if (!suc) {
-        client.removeCallBack(message.getOpt());
-      }
 
-      return future != null ?  future.get(10, TimeUnit.SECONDS) : null;
+      return null;
     }
   }
 

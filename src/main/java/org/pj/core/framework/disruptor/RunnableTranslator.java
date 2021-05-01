@@ -17,7 +17,7 @@ public class RunnableTranslator implements EventTranslatorOneArg<GameRunnable, R
 
   @Override
   public void translateTo(GameRunnable event, long sequence, Runnable run) {
-    event.setName("起个名字?");
+    event.setName("未知任务");
     event.setRunnable(run);
   }
 }

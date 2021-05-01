@@ -9,8 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Parser;
 import io.netty.channel.Channel;
-import java.nio.ByteBuffer;
 import org.junit.jupiter.api.Test;
+import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.msg.adp.ContextAdapter;
 import org.pj.core.msg.adp.ProtobufAdapter;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
@@ -34,14 +34,15 @@ public class IAdapterTest {
     ProtobufAdapter adapter = ProtobufAdapter.getInstance();
 
     assertNull(adapter.extractParser(Integer.class));
-    assertNull(adapter.extractParser(Message.class));
+    assertNotNull(adapter.extractParser(Message.class));
     assertNotNull(adapter.extractParser(HelloWorld.class));
 
+    Parser<?> parser = adapter.extractParser(Message.class);
     Parser<?> helloWorldParser = adapter.extractParser(HelloWorld.class);
 
     HelloWorld helloWorld = HelloWorld.newBuilder().setStr("EchoHelloWorld").build();
-    Message message = Message.valueOf().setBody(helloWorld.toByteArray());
-    Message echoMessage = Message.readFrom(ByteBuffer.wrap(message.toByteArray()));
+    Message message = Message.newBuilder().setBody(helloWorld.toByteString()).build();
+    Message echoMessage = (Message) parser.parseFrom(message.toByteString());
     HelloWorld echoHelloWorld = (HelloWorld) helloWorldParser.parseFrom(echoMessage.getBody());
 
     assertEquals(message, echoMessage);

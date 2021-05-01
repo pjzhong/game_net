@@ -15,7 +15,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.pj.core.framework.SpringGameContext;
-import org.pj.core.msg.Message;
+import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.NettyTcpClient;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
 import org.pj.core.net.init.WebSocketClientHandlerInitializer;
@@ -46,7 +46,7 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
     return callbacks.remove(msgId);
   }
 
-  public <T, R> T asyncProxy(Class<T> clz, ResultCallBack<R> callback) {
+  public <T, R> T asyncProxy(Class<T> clz, SocketCallback<R> callback) {
     return proxy.asynProxy(clz, callback);
   }
 
@@ -81,7 +81,7 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
     }
   }
 
-  public boolean sendMessage(Object msg) {
+  public boolean sendMessage(Message msg) {
     return client.sendMessage(msg);
   }
 
@@ -110,10 +110,9 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
 
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
-    SocketCallback<Object> callback = callbacks.remove(msg.getOpt());
-    if (callback != null) { //TODO 执行回调
-      //TODO 增加回调执行
-      context.getDispatcher().add(ctx.channel(), msg);
+    SocketCallback<Object> callback = callbacks.remove(msg.getSerial());
+    if (callback != null) {
+      context.getThreadPool().exec(ctx.channel(), () -> callback.accept(msg));
     } else {
       //内部消息
       context.getDispatcher().add(ctx.channel(), msg);
