@@ -3,8 +3,6 @@ package org.pj.core.event;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pj.boot.GameBoot;
-import org.pj.core.framework.SpringGameContext;
 import org.pj.module.event.EventTestSystem;
 
 public class EventBusTest {
@@ -32,29 +30,12 @@ public class EventBusTest {
     bus.registerEvent(testSystem);
 
     bus.asyncFireEvent(INIT_EVENT, 1);
-    TimeUnit.MILLISECONDS.sleep(1);
+    TimeUnit.MILLISECONDS.sleep(10);
     Assertions.assertEquals(testSystem.number, 1);
 
     bus.asyncFireEvent(ADD_EVENT, 1);
-    TimeUnit.MILLISECONDS.sleep(1);
+    TimeUnit.MILLISECONDS.sleep(10);
     Assertions.assertEquals(testSystem.number, 2);
-  }
-
-  @Test
-  public void withGameContext() throws Exception {
-    GameBoot localBoot = GameBoot.start();
-    SpringGameContext gameContext = localBoot.getGameCtx();
-
-    EventTestSystem testSystem = gameContext.getBean(EventTestSystem.class);
-
-    gameContext.fireEvent(INIT_EVENT, 1);
-    Assertions.assertEquals(testSystem.number, 1);
-
-    gameContext.fireEvent(ADD_EVENT, 1);
-    Assertions.assertEquals(testSystem.number, 2);
-
-    gameContext.close();
-    localBoot.getSpringCtx().close();
   }
 
 }

@@ -1,6 +1,7 @@
 package org.pj.core.framework.cross;
 
-import org.pj.core.msg.MessageProto.Message;
+
+import org.pj.core.msg.Message;
 
 public interface ResultCallBack<T> extends SocketCallback<T> {
 

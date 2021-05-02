@@ -9,7 +9,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import java.nio.charset.StandardCharsets;
 import org.pj.common.NamedThreadFactory;
 
 /**
@@ -40,16 +39,20 @@ public class ExampleTcpClient {
     initBootstrap(group);
   }
 
-  public void sendMsg(String msg) {
-    ByteBuf buf = channel.alloc().buffer();
-    buf.writeBytes(msg.getBytes(StandardCharsets.UTF_8));
-    channel.writeAndFlush(buf, channel.voidPromise());
+  public void sendMsg(Object msg) {
+    channel.writeAndFlush(msg, channel.voidPromise());
   }
 
   public void sendMsg(MessageLite packet) {
     ByteBuf buf = channel.alloc().buffer();
     buf.writeBytes(packet.toByteArray());
     channel.writeAndFlush(buf, channel.voidPromise());
+  }
+
+  public void sendMsg(byte[] packet) {
+    ByteBuf buf = channel.alloc().buffer();
+    buf.writeBytes(packet);
+    channel.writeAndFlush(buf);
   }
 
   private void initBootstrap(EventLoopGroup loopGroup) throws InterruptedException {

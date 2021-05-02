@@ -1,7 +1,8 @@
 package org.pj.core.framework.cross;
 
 import java.util.concurrent.CompletableFuture;
-import org.pj.core.msg.MessageProto.Message;
+import org.pj.core.msg.Message;
+
 
 public class CompleteSocketCallBack implements ResultCallBack {
 

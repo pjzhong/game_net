@@ -33,7 +33,8 @@ public class ContextAdapter implements IAdapter<Object> {
     Field[] fields = InvokeContext.class.getDeclaredFields();
     Map<Class<?>, Field> fieldMap = new HashMap<>();
     for (Field f : fields) {
-      if(Modifier.isTransient(f.getModifiers())) {
+      if (Modifier.isTransient(f.getModifiers())
+          || Modifier.isStatic(f.getModifiers())) {
         continue;
       }
 

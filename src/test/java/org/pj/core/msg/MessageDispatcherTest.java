@@ -1,5 +1,6 @@
 package org.pj.core.msg;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,6 +11,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -21,7 +23,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.pj.common.NamedThreadFactory;
-import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.ExampleTcpClient;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
@@ -61,31 +62,44 @@ public class MessageDispatcherTest {
   @Test
   public void helloWorldTest() throws Exception {
 
-    Message request = Message.newBuilder().setModule(1).build();
+    Message request = Message.valueOf().setModule(2)
+        .setBody(ByteString.copyFromUtf8("HelloWorld").toByteArray());
+    Message request1 = Message.valueOf().setModule(2)
+        .setBody(ByteString.copyFromUtf8("HelloWorld1").toByteArray());
 
-    int loop = 5;
-    CountDownLatch latch = new CountDownLatch(loop);
+
+    int loop = 100;
+    CountDownLatch latch = new CountDownLatch(loop * 2);
     ExampleTcpClient client = new ExampleTcpClient("localhost", 8080,
         new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
           @Override
           public void channelRead0(ChannelHandlerContext ctx, Message msg) {
-            assertEquals(msg.getBody().toStringUtf8(), "HelloWorld");
+            assertEquals(new String(msg.getBody()), "HelloWorld");
+            latch.countDown();
+          }
+        }));
+    ExampleTcpClient client1 = new ExampleTcpClient("localhost", 8080,
+        new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
+          @Override
+          public void channelRead0(ChannelHandlerContext ctx, Message msg) {
+            assertEquals(new String(msg.getBody()), "HelloWorld1");
             latch.countDown();
           }
         }));
 
     for (int i = 0; i < loop; i++) {
       client.sendMsg(request);
+      client1.sendMsg(request1);
     }
 
-    assertTrue(latch.await(300, TimeUnit.MILLISECONDS), "HelloWorld Failed");
+    assertTrue(latch.await(1, TimeUnit.MINUTES), "HelloWorld Failed");
+    client.close();
+    client1.close();
   }
 
   @Test
   public void echoContextTest() throws Exception {
-
-    Message request = Message.newBuilder().setModule(2).setBody(ByteString.copyFromUtf8("echo"))
-        .build();
+    Message request = new Message().setModule(2).setBody("echo".getBytes(StandardCharsets.UTF_8));
 
     int loop = 5;
     CountDownLatch latch = new CountDownLatch(loop);
@@ -93,9 +107,9 @@ public class MessageDispatcherTest {
         new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
           @Override
           public void channelRead0(ChannelHandlerContext ctx, Message msg) {
-            assertEquals(request.getBody(), msg.getBody());
+            assertArrayEquals(request.getBody(), msg.getBody());
             assertEquals(-request.getModule(), msg.getModule());
-            assertEquals(200, msg.getStat());
+            assertEquals(200, msg.getOpt());
             latch.countDown();
           }
         }));
@@ -104,16 +118,15 @@ public class MessageDispatcherTest {
       client.sendMsg(request);
     }
 
-    assertTrue(latch.await(300, TimeUnit.MILLISECONDS), "Echo Failed");
+    assertTrue(latch.await(300, TimeUnit.MINUTES), "Echo Failed");
   }
 
   @Test
   public void echoHelloWorld() throws Exception {
 
     HelloWorld world = HelloWorld.newBuilder().setStr("echoHelloWorld").build();
-    Message request = Message.newBuilder().setModule(3)
-        .setBody(world.toByteString())
-        .build();
+    Message request = Message.valueOf().setModule(3)
+        .setBody(world.toByteArray());
 
     int loop = 100;
     CountDownLatch latch = new CountDownLatch(loop);
@@ -123,7 +136,7 @@ public class MessageDispatcherTest {
           public void channelRead0(ChannelHandlerContext ctx, Message msg)
               throws InvalidProtocolBufferException {
             HelloWorld echoWorld = HelloWorld.parseFrom(msg.getBody());
-            assertEquals(request.getBody(), msg.getBody());
+            assertArrayEquals(request.getBody(), msg.getBody());
             assertEquals(world, echoWorld);
             latch.countDown();
           }
@@ -138,8 +151,7 @@ public class MessageDispatcherTest {
 
   @Test
   public void countTcpTest() throws Exception {
-    Message request = Message.newBuilder().setModule(4)
-        .build();
+    Message request = Message.valueOf().setModule(4);
 
     int size = 100, senders = 8, total = size * senders;
     CountDownLatch latch = new CountDownLatch(total);

@@ -18,7 +18,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.pj.boot.GameBoot;
 import org.pj.core.framework.SpringGameContext;
-import org.pj.core.msg.MessageProto.Message;
+import org.pj.core.msg.Message;
 import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.core.net.NettyTcpClient;
 import org.pj.core.net.init.WebSocketClientHandlerInitializer;
@@ -54,12 +54,11 @@ public class GameContextTest {
     }
 
     HelloWorld world = HelloWorld.newBuilder().setStr("Hello World").build();
-    Message message = Message.newBuilder()
-        .setVersion(1)
+    Message message = Message.valueOf()
         .setModule(3)
-        .setStat(200)
-        .setSerial(0)
-        .setBody(HelloWorld.newBuilder().setStr("Hello World").build().toByteString()).build();
+        .setStates(200)
+        .setOpt(0)
+        .setBody(HelloWorld.newBuilder().setStr("Hello World").build().toByteArray());
 
     int loop = 100;
     CountDownLatch latch = new CountDownLatch(loop * 2);
@@ -67,7 +66,7 @@ public class GameContextTest {
       @Override
       public void onMessage(ByteBuffer bytes) {
         try {
-          Message echoMessage = Message.parseFrom(bytes);
+          Message echoMessage = Message.readFrom(bytes);
           HelloWorld echoWorld = HelloWorld.parseFrom(echoMessage.getBody());
           Assertions.assertEquals(echoWorld, world);
         } catch (InvalidProtocolBufferException e) {
@@ -80,7 +79,7 @@ public class GameContextTest {
       @Override
       public void onMessage(ByteBuffer bytes) {
         try {
-          Message echoMessage = Message.parseFrom(bytes);
+          Message echoMessage = Message.readFrom(bytes);
           HelloWorld echoWorld = HelloWorld.parseFrom(echoMessage.getBody());
           Assertions.assertEquals(echoWorld, world);
         } catch (InvalidProtocolBufferException e) {
@@ -108,11 +107,11 @@ public class GameContextTest {
       return;
     }
 
-    Message message = Message.newBuilder()
+    Message message = Message.valueOf()
         .setModule(5)
-        .setStat(200)
-        .setSerial(0)
-        .setBody(HelloWorld.newBuilder().setStr("Hello World").build().toByteString()).build();
+        .setStates(200)
+        .setOpt(0)
+        .setBody(HelloWorld.newBuilder().setStr("Hello World").build().toByteArray());
 
     CountDownLatch latch = new CountDownLatch(1);
     NioEventLoopGroup group = new NioEventLoopGroup(1);
@@ -132,7 +131,7 @@ public class GameContextTest {
               @Override
               protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
                 Assertions.assertEquals(-5, msg.getModule());
-                Assertions.assertEquals(100, msg.getStat());
+                Assertions.assertEquals(100, msg.getOpt());
                 latch.countDown();
               }
             }));

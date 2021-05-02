@@ -11,6 +11,7 @@ import org.pj.core.msg.IAdapter;
 import org.pj.core.msg.InvokeContext;
 
 /**
+ * TODO 这个GoogleProto用的不太好，解码的临时数组产生了太多垃圾
  * @author ZJP
  * @since 2020年06月11日 12:17:43
  **/
@@ -36,13 +37,13 @@ public class ProtobufAdapter implements IAdapter<Object> {
    */
   public Parser<?> extractParser(Class<?> clazz) {
     try {
-      return parsers.computeIfAbsent(clazz, this::doParser);
+      return parsers.computeIfAbsent(clazz, this::doExtractParser);
     } catch (Exception ignore) {
     }
     return null;
   }
 
-  private Parser<?> doParser(Class<?> clazz) {
+  private Parser<?> doExtractParser(Class<?> clazz) {
     Parser<?> parser = null;
     try {
       parser = (Parser<?>) clazz
@@ -55,7 +56,7 @@ public class ProtobufAdapter implements IAdapter<Object> {
   }
 
   @Override
-  public Object adapter(InvokeContext context, HandlerInfo info, int idx) throws Exception {
+  public Object adapter(InvokeContext context, HandlerInfo info, int idx) {
     ParameterInfo parameterInfo = info.getParameterInfos().get(idx);
     try {
 

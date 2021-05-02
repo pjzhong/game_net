@@ -1,5 +1,6 @@
 package org.pj.core.msg;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,16 +10,12 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.pj.core.msg.MessageProto.Message;
 import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
@@ -60,11 +57,8 @@ public class WebSocketMessageDispatcherTest {
     ExampleWebSocketClient client = new ExampleWebSocketClient(new URI("ws://127.0.0.1:8080")) {
       @Override
       public void onMessage(ByteBuffer bytes) {
-        try {
-          consumer.accept(Message.parseFrom(bytes));
-        } catch (InvalidProtocolBufferException e) {
-          throw new RuntimeException(e);
-        }
+        consumer.accept(Message.readFrom(bytes));
+
       }
     };
     client.connectBlocking();
@@ -74,12 +68,12 @@ public class WebSocketMessageDispatcherTest {
   @Test
   public void helloWorldTest() throws Exception {
 
-    Message request = Message.newBuilder().setModule(1).build();
+    Message request = Message.valueOf().setModule(1);
 
     int loop = 5;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleWebSocketClient client = newClient(msg -> {
-      assertEquals("HelloWorld", msg.getBody().toStringUtf8());
+      assertEquals("HelloWorld", new String(msg.getBody()));
       latch.countDown();
     });
     for (int i = 0; i < loop; i++) {
@@ -94,15 +88,15 @@ public class WebSocketMessageDispatcherTest {
   @Test
   public void echoContextTest() throws Exception {
 
-    Message request = Message.newBuilder().setModule(2).setBody(ByteString.copyFromUtf8("echo"))
-        .build();
+    Message request = Message.valueOf().setModule(2)
+        .setBody(ByteString.copyFromUtf8("echo").toByteArray());
 
     int loop = 5;
     CountDownLatch latch = new CountDownLatch(loop);
     ExampleWebSocketClient client = newClient(msg -> {
-      assertEquals(request.getBody(), msg.getBody());
+      assertArrayEquals(request.getBody(), msg.getBody());
       assertEquals(-request.getModule(), msg.getModule());
-      assertEquals(200, msg.getStat());
+      assertEquals(200, msg.getStates());
       latch.countDown();
     });
 
@@ -118,9 +112,9 @@ public class WebSocketMessageDispatcherTest {
   public void echoHelloWorld() throws Exception {
 
     HelloWorld world = HelloWorld.newBuilder().setStr("echoHelloWorld").build();
-    Message request = Message.newBuilder().setModule(3)
-        .setBody(world.toByteString())
-        .build();
+    Message request = Message.valueOf().setModule(2)
+        .setBody(world.toByteArray())
+        ;
 
     int loop = 10;
     CountDownLatch latch = new CountDownLatch(loop);
@@ -131,7 +125,7 @@ public class WebSocketMessageDispatcherTest {
       } catch (InvalidProtocolBufferException e) {
         e.printStackTrace();
       }
-      assertEquals(request.getBody(), msg.getBody());
+      assertArrayEquals(request.getBody(), msg.getBody());
       assertEquals(world, echoWorld);
       latch.countDown();
     });
@@ -147,10 +141,9 @@ public class WebSocketMessageDispatcherTest {
 
   @Test
   public void countTest() throws Exception {
-    Message request = Message.newBuilder().setModule(4)
-        .build();
+    Message request = Message.valueOf().setModule(4);
 
-    int size = 100, senders = 8, total = size * senders;
+    int size = 100, senders = 64, total = size * senders;
     CountDownLatch latch = new CountDownLatch(total);
     int[] result = new int[total + 1];
     ExampleWebSocketClient[] clients = new ExampleWebSocketClient[senders];
@@ -167,12 +160,11 @@ public class WebSocketMessageDispatcherTest {
       });
     }
 
-    ForkJoinPool pool = ForkJoinPool.commonPool();
-    Random random = ThreadLocalRandom.current();
-    for (int i = 0, loop = size * senders, limits = senders - 1; i < loop; i++) {
-      int h = random.nextInt();
-      int idx = (h ^ (h >>> 16)) & limits;
-      pool.execute(() -> clients[idx].send(request.toByteArray()));
+    byte[] array = request.toByteArray();
+    for (int i = 0; i < size; i++) {
+      for (int s = 0; s < senders; s++) {
+        clients[s].send(array);
+      }
     }
 
     assertTrue(latch.await(10, TimeUnit.SECONDS), "Count TimeOut");

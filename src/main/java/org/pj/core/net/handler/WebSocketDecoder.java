@@ -1,12 +1,11 @@
 package org.pj.core.net.handler;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import java.util.List;
-import org.pj.core.msg.MessageProto.Message;
+import org.pj.core.msg.Message;
 
 /**
  * SimpleDecoder
@@ -19,8 +18,7 @@ public class WebSocketDecoder extends MessageToMessageDecoder<BinaryWebSocketFra
 
 
   @Override
-  protected void decode(ChannelHandlerContext ctx, BinaryWebSocketFrame msg, List<Object> out)
-      throws InvalidProtocolBufferException {
-    out.add(Message.parseFrom(msg.content().nioBuffer()));
+  protected void decode(ChannelHandlerContext ctx, BinaryWebSocketFrame msg, List<Object> out) {
+    out.add(Message.readFrom(msg.content()));
   }
 }

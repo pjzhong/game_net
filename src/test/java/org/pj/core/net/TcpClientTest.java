@@ -2,7 +2,6 @@ package org.pj.core.net;
 
 import static io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler.ClientHandshakeStateEvent.HANDSHAKE_COMPLETE;
 
-import com.google.protobuf.ByteString;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoopGroup;
@@ -10,6 +9,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterAll;
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.pj.common.NamedThreadFactory;
-import org.pj.core.msg.MessageProto.Message;
+import org.pj.core.msg.Message;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
 import org.pj.core.net.init.WebSocketClientHandlerInitializer;
 import org.pj.core.net.init.WebSocketServerHandlerInitializer;
@@ -67,13 +67,13 @@ public class TcpClientTest {
 
   @Test
   public void echoHelloWorld() throws Exception {
-    Message message = Message.newBuilder().setBody(ByteString.copyFromUtf8("Hello World")).build();
+    Message message = Message.valueOf().setBody("Hello World".getBytes(StandardCharsets.UTF_8));
     CountDownLatch latch = new CountDownLatch(1);
     ChannelHandler handler = new ProtobufSocketHandlerInitializer(
         new SimpleChannelInboundHandler<Message>() {
           @Override
           protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
-            Assertions.assertEquals(msg, message);
+            Assertions.assertArrayEquals(msg.getBody(), message.getBody());
             latch.countDown();
           }
         });
@@ -89,8 +89,8 @@ public class TcpClientTest {
 
   @Test
   public void echoOnWebSocket() throws Exception {
-    Message message = Message.newBuilder().setModule(2)
-        .setBody(ByteString.copyFromUtf8("Hello World")).build();
+    Message message = Message.valueOf().setModule(2)
+        .setBody("Hello World".getBytes(StandardCharsets.UTF_8));
     CountDownLatch latch = new CountDownLatch(1);
     CountDownLatch wait = new CountDownLatch(1);
 

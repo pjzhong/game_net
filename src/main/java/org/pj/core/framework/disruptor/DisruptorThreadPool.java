@@ -43,7 +43,7 @@ public class DisruptorThreadPool {
   }
 
   private int nextPoolIdx() {
-    int nextIdx = nextIndex.incrementAndGet();
+    int nextIdx = nextIndex.getAndIncrement();
     if (pools.length <= nextIdx) {
       nextIndex.compareAndSet(nextIdx, 0);
       nextIdx = nextIdx % pools.length;

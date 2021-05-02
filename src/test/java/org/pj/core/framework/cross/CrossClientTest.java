@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.google.protobuf.ByteString;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterAll;
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.pj.boot.GameBoot;
 import org.pj.core.framework.SpringGameContext;
-import org.pj.core.msg.MessageProto.Message;
+import org.pj.core.msg.Message;
 import org.pj.core.msg.Packet;
 import org.pj.protocols.Facade;
 import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
@@ -52,15 +52,15 @@ public class CrossClientTest {
     CrossGameClient client = new CrossGameClient(local);
     client.connect(URI.create("ws://localhost:8081"));
 
-    Message request = Message.newBuilder()
+    Message request = Message.valueOf()
         .setModule(client.genMsgId())
         .setModule(2)
-        .setBody(ByteString.copyFromUtf8("Hello World")).build();
+        .setBody("Hello World".getBytes(StandardCharsets.UTF_8));
 
     CountDownLatch latch = new CountDownLatch(1);
-    client.addSocketCallback(request.getSerial(), (SocketCallback<Message>) message -> {
+    client.addSocketCallback(request.getOpt(), (SocketCallback<Message>) message -> {
       assertEquals(request.getBody(), message.getBody());
-      assertEquals(request.getSerial(), message.getSerial());
+      assertEquals(request.getOpt(), message.getOpt());
       latch.countDown();
     });
     client.sendMessage(request);

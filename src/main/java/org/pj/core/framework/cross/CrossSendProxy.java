@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.pj.core.msg.MessageProto.Message;
+import org.pj.core.msg.Message;
 import org.pj.core.msg.Packet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,30 +60,29 @@ public class CrossSendProxy {
             method.getName());
         return null;
       }
-      Message.Builder builder = Message.newBuilder()
+      Message builder = Message.valueOf()
           .setModule(packet.value())
-          .setSerial(client.genMsgId());
+          .setOpt(client.genMsgId());
       if (args != null) {
         for (Object o : args) {
           if (o instanceof MessageLite) {
             MessageLite lite = (MessageLite) o;
-            builder.setBody(lite.toByteString());
+            builder.setBody(lite.toByteArray());
             break;
           }
         }
       }
 
-      Message message = builder.build();
       SocketCallback<?> callback = currentCallBack.get();
       if(callback != null) {
         SocketCallback<?> clientCallBack;
         currentCallBack.remove();
         clientCallBack = new ProtoBufCallBackAdapter(method, callback);
 
-        client.addSocketCallback(message.getSerial(), clientCallBack);
-        boolean suc = client.sendMessage(message);
+        client.addSocketCallback(builder.getOpt(), clientCallBack);
+        boolean suc = client.sendMessage(builder);
         if (!suc) {
-          client.removeCallBack(message.getSerial());
+          client.removeCallBack(builder.getOpt());
         }
       }
 
