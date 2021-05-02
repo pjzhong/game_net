@@ -42,7 +42,7 @@ public class MessageDispatcher implements AutoCloseable {
    * @since 2021年05月01日 10:04:49
    */
   public MessageDispatcher(int threadSize) {
-    disruptorPool = new DisruptorThreadPool(Runtime.getRuntime().availableProcessors() / 2, 4096,
+    disruptorPool = new DisruptorThreadPool(threadSize, 4096,
         new NamedThreadFactory("game-disruptor-thread"));
     msgCount = new AtomicInteger();
     handlers = new ConcurrentHashMap<>();
@@ -66,10 +66,6 @@ public class MessageDispatcher implements AutoCloseable {
       return false;
     }
 
-    int count = msgCount.get();
-    if (count > 100) {
-    }
-
     HandlerInfo handler = handlers.get(msg.getModule());
     if (handler == null) {
       logger.error("No handler for module-{}", msg.getModule());
@@ -78,7 +74,6 @@ public class MessageDispatcher implements AutoCloseable {
       return false;
     }
 
-    // TODO 用了，但是效果不明显
     InvokeContext invoker = InvokeContext.FACTORY.get();
     invoker.setValue(channel, msg, handler);
     disruptorPool.exec(channel, invoker);
@@ -89,7 +84,7 @@ public class MessageDispatcher implements AutoCloseable {
     return Message.newBuilder()
         .setSerial(message.getSerial())
         .setModule(message.getModule() < 0 ? message.getModule() : -message.getModule())
-        .setStat(-1)//TODO 规范错误码
+        .setStat(SystemStates.MODULE_404)
         .build();
   }
 

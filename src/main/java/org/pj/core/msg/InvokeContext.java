@@ -75,7 +75,7 @@ public class InvokeContext implements Runnable {
     Message.Builder builder = Message.newBuilder();
     fillState(builder, request);
     return builder
-        .setStat(100)//TODO 规范化 消息状态码
+        .setStat(SystemStates.SYSTEM_ERR)
         .build();
   }
 
@@ -98,7 +98,7 @@ public class InvokeContext implements Runnable {
       builder.mergeFrom((Message) result);
     } else if (result instanceof MessageLite) {
       builder
-          .mergeFrom(context.getMessage()) //TODO 这个Merge很疑惑
+          .mergeFrom(context.getMessage())
           .setBody(((MessageLite) result).toByteString());
     } else {
       logger.error("module {} can't return type {}", request.getModule(),
@@ -119,7 +119,7 @@ public class InvokeContext implements Runnable {
         .setSerial(request.getSerial())
         .setModule(responseType);
     if (builder.getStat() == 0) {
-      builder.setStat(200);
+      builder.setStat(SystemStates.OK);
     }
     return builder;
   }
