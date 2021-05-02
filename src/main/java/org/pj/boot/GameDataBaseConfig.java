@@ -29,19 +29,7 @@ public class GameDataBaseConfig {
   }
 
   /* 数据库配置 */
-  @Bean(value = "configDataSource", destroyMethod = "close")
-  public HikariDataSource configDataSource(Environment env) {
-    HikariConfig config = new HikariConfig();
-    config.setJdbcUrl(env.getRequiredProperty("db.config.url"));
-    config.setDriverClassName("com.mysql.jdbc.Driver");
-    config.setMaximumPoolSize(50);
-    config.setMinimumIdle(0);
-    config.setConnectionTestQuery("select 1");
-    config.setPoolName("configDataSource");
-    return new HikariDataSource(config);
-  }
-
-  @Bean("configDao")
+ /* @Bean("configDao")
   public JdbcTemplate configJdbcTemplate(@Qualifier("configDataSource") DataSource dataSource) {
     return new JdbcTemplate(dataSource);
   }
@@ -55,5 +43,17 @@ public class GameDataBaseConfig {
   public MongoTemplate mongoTemplate(@Qualifier("game_mongo") MongoDatabaseFactory factory) {
     return new MongoTemplate(factory);
   }
+
+  @Bean(value = "configDataSource", destroyMethod = "close")
+  public HikariDataSource configDataSource(Environment env) {
+    HikariConfig config = new HikariConfig();
+    config.setJdbcUrl(env.getRequiredProperty("db.config.url"));
+    config.setDriverClassName("com.mysql.jdbc.Driver");
+    config.setMaximumPoolSize(50);
+    config.setMinimumIdle(0);
+    config.setConnectionTestQuery("select 1");
+    config.setPoolName("configDataSource");
+    return new HikariDataSource(config);
+  }*/
 
 }

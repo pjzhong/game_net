@@ -62,7 +62,7 @@ public class Message {
   public void toByteArray(ByteBuf buf) {
     buf.writeInt(this.getStates())
         .writeInt(this.getModule())
-        .writeInt(this.getStates())
+        .writeInt(this.getOpt())
         .writeBytes(ArrayUtils.EMPTY_BYTE_ARRAY);
     if (ObjectUtils.isNotEmpty(this.getBody())) {
       buf.writeBytes(this.getBody());

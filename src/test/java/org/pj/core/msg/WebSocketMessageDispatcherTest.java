@@ -143,7 +143,7 @@ public class WebSocketMessageDispatcherTest {
   public void countTest() throws Exception {
     Message request = Message.valueOf().setModule(4);
 
-    int size = 100, senders = 64, total = size * senders;
+    int size = 10, senders = 10, total = size * senders;
     CountDownLatch latch = new CountDownLatch(total);
     int[] result = new int[total + 1];
     ExampleWebSocketClient[] clients = new ExampleWebSocketClient[senders];

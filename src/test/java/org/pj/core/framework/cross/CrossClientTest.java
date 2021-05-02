@@ -1,5 +1,6 @@
 package org.pj.core.framework.cross;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -59,13 +60,13 @@ public class CrossClientTest {
 
     CountDownLatch latch = new CountDownLatch(1);
     client.addSocketCallback(request.getOpt(), (SocketCallback<Message>) message -> {
-      assertEquals(request.getBody(), message.getBody());
+      assertArrayEquals(request.getBody(), message.getBody());
       assertEquals(request.getOpt(), message.getOpt());
       latch.countDown();
     });
     client.sendMessage(request);
 
-    assertTrue(latch.await(100, TimeUnit.MILLISECONDS), "echo failed");
+    assertTrue(latch.await(100, TimeUnit.SECONDS), "echo failed");
   }
 
   @Test
@@ -117,7 +118,7 @@ public class CrossClientTest {
   @Facade
   public interface CrossHelloFacade {
 
-    @Packet(3)
+    @Packet(2)
     HelloWorld echoHelloWorld(HelloWorld world);
 
     @Packet(Integer.MAX_VALUE)

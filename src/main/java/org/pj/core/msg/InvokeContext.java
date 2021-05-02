@@ -61,7 +61,7 @@ public class InvokeContext implements Runnable {
     } catch (Exception e) {
       channel.write(sysErr(request));
       logger
-          .error(String.format("cid [%s] handle [%s] error", channel.id(), request.getModule()),
+          .error("cid [{}] handle module [{}] error", channel.id(), request.getModule(),
               e);
     } finally {
       channel.eventLoop().execute(channel::flush);
@@ -93,7 +93,7 @@ public class InvokeContext implements Runnable {
 
     Message response = Message.valueOf();
     if (result instanceof Message) {
-      response.setBody(request.getBody());
+      response.setBody(((Message) result).getBody());
     } else if (result instanceof MessageLite) {
       response
           .setBody(((MessageLite) result).toByteArray());

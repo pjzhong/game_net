@@ -109,7 +109,7 @@ public class MessageDispatcherTest {
           public void channelRead0(ChannelHandlerContext ctx, Message msg) {
             assertArrayEquals(request.getBody(), msg.getBody());
             assertEquals(-request.getModule(), msg.getModule());
-            assertEquals(200, msg.getOpt());
+            assertEquals(0, msg.getOpt());
             latch.countDown();
           }
         }));
@@ -118,14 +118,14 @@ public class MessageDispatcherTest {
       client.sendMsg(request);
     }
 
-    assertTrue(latch.await(300, TimeUnit.MINUTES), "Echo Failed");
+    assertTrue(latch.await(300, TimeUnit.MILLISECONDS), "Echo Failed");
   }
 
   @Test
   public void echoHelloWorld() throws Exception {
 
     HelloWorld world = HelloWorld.newBuilder().setStr("echoHelloWorld").build();
-    Message request = Message.valueOf().setModule(3)
+    Message request = Message.valueOf().setModule(2)
         .setBody(world.toByteArray());
 
     int loop = 100;

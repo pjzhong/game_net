@@ -55,7 +55,7 @@ public class GameContextTest {
 
     HelloWorld world = HelloWorld.newBuilder().setStr("Hello World").build();
     Message message = Message.valueOf()
-        .setModule(3)
+        .setModule(2)
         .setStates(200)
         .setOpt(0)
         .setBody(HelloWorld.newBuilder().setStr("Hello World").build().toByteArray());
@@ -131,7 +131,7 @@ public class GameContextTest {
               @Override
               protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
                 Assertions.assertEquals(-5, msg.getModule());
-                Assertions.assertEquals(100, msg.getOpt());
+                Assertions.assertEquals(500, msg.getStates());
                 latch.countDown();
               }
             }));
