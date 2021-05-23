@@ -30,6 +30,7 @@ public class NettyTcpServer implements AutoCloseable {
     bootstrap.channel(NioServerSocketChannel.class);
     bootstrap.option(ChannelOption.SO_BACKLOG, 1024);
     bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
+    bootstrap.childOption(ChannelOption.SO_REUSEADDR, true);
     bootstrap.childOption(ChannelOption.SO_RCVBUF, 128 * 1024);
     bootstrap.childOption(ChannelOption.SO_SNDBUF, 128 * 1024);
 

@@ -75,7 +75,7 @@ public class MessageDispatcher implements AutoCloseable {
 
     InvokeContext invoker = InvokeContext.FACTORY.get();
     invoker.setValue(channel, msg, handler);
-    disruptorPool.exec(channel, invoker);
+    disruptorPool.exec(channel, "playerTask", invoker);
     return true;
   }
 

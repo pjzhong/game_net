@@ -112,7 +112,7 @@ public class CrossGameClient extends SimpleChannelInboundHandler<Message> {
   protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
     SocketCallback<Object> callback = callbacks.remove(msg.getOpt());
     if (callback != null) {
-      context.getThreadPool().exec(ctx.channel(), () -> callback.accept(msg));
+      context.getThreadPool().exec(ctx.channel(), "crossCallBack", () -> callback.accept(msg));
     } else {
       //内部消息
       context.getDispatcher().add(ctx.channel(), msg);

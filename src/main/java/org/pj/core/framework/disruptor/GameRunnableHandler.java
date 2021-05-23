@@ -8,14 +8,14 @@ import com.lmax.disruptor.EventHandler;
  * @author ZJP
  * @since 2021年02月19日 18:15:17
  **/
-public class GameRunnableHandler implements EventHandler<GameRunnable> {
+public class GameRunnableHandler implements EventHandler<RunnableWrapper> {
 
   @Override
-  public void onEvent(GameRunnable event, long sequence, boolean endOfBatch) throws Exception {
+  public void onEvent(RunnableWrapper event, long sequence, boolean endOfBatch) throws Exception {
     try {
       event.run();
-    } finally {
-      event.clear();
+    } catch (Exception e) {
+      //TODO Report this error to log
     }
   }
 }

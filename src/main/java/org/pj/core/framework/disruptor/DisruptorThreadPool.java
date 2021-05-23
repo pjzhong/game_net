@@ -5,13 +5,14 @@ import com.lmax.disruptor.dsl.Disruptor;
 import io.netty.channel.Channel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.pj.common.NamedThreadFactory;
 
 public class DisruptorThreadPool {
 
   /** 线程池 */
-  private Disruptor<GameRunnable>[] pools;
+  private Disruptor<RunnableWrapper>[] pools;
   /** 线程池地址 */
   private AttributeKey<Integer> poolIdx = AttributeKey.valueOf("Pool-Index");
   /** 下一个线程池 */
@@ -24,10 +25,11 @@ public class DisruptorThreadPool {
 
   public DisruptorThreadPool(int poolSize, int buffSize, NamedThreadFactory factory) {
     nextIndex = new AtomicInteger(0);
-    EventHandler<GameRunnable> handler = new GameRunnableHandler();
+    EventHandler<RunnableWrapper> handler = new GameRunnableHandler();
     pools = new Disruptor[poolSize];
     for (int i = 0; i < poolSize; i++) {
-      Disruptor<GameRunnable> disruptor = new Disruptor<>(GameRunnable::new, buffSize, factory);
+      Disruptor<RunnableWrapper> disruptor = new Disruptor<>(RunnableWrapper::new, buffSize,
+          factory);
       disruptor.handleEventsWith(handler);
       disruptor.start();
       pools[i] = disruptor;
@@ -51,14 +53,18 @@ public class DisruptorThreadPool {
     return nextIdx;
   }
 
-
-  public void exec(Channel o, Runnable runnable) {
-    Disruptor<GameRunnable> disruptor = pools[bind(o)];
-    disruptor.getRingBuffer().publishEvent(RunnableTranslator.INSTANCE, runnable);
+  public void exec(String name, Runnable runnable) {
+    Disruptor<RunnableWrapper> disruptor = pools[ThreadLocalRandom.current().nextInt(pools.length)];
+    disruptor.getRingBuffer().publishEvent((event, sequence, r, n) -> {
+      event.setRunnable(r);
+      event.setName(n);
+    }, runnable, name);
   }
 
-  public void exec(int idx, String name, Runnable runnable) {
-    pools[idx].publishEvent((event, sequence, r, n) -> {
+
+  public void exec(Channel o, String name, Runnable runnable) {
+    Disruptor<RunnableWrapper> disruptor = pools[bind(o)];
+    disruptor.getRingBuffer().publishEvent((event, sequence, r, n) -> {
       event.setRunnable(r);
       event.setName(n);
     }, runnable, name);
@@ -69,7 +75,7 @@ public class DisruptorThreadPool {
   }
 
   public void shutdown() throws InterruptedException {
-    for (Disruptor<GameRunnable> e : pools) {
+    for (Disruptor<RunnableWrapper> e : pools) {
       e.shutdown();
     }
   }

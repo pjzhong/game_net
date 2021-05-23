@@ -7,19 +7,20 @@ import org.pj.boot.CrossServerConfig;
 import org.pj.boot.ServerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.FilterType;
 
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(excludeFilters = @Filter(type = FilterType.REGEX,
     pattern = "org.pj.boot.*"))
 public class SpringBootRun {
 
   public static void main(String[] args) {
     boolean cross = Arrays.asList(args).contains("cross");
-    List<Class> classList = new ArrayList<>();
+    List<Class<?>> classList = new ArrayList<>();
     classList.add(SpringBootRun.class);
     if (cross) {
       classList.add(CrossServerConfig.class);
