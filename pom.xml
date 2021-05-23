@@ -22,7 +22,7 @@
     <google.protobuf>3.9.1</google.protobuf>
     <netty.version>4.1.42.Final</netty.version>
     <commons-lang3.version>3.9</commons-lang3.version>
-    <log4j.version>2.13.1</log4j.version>
+    <log4j.version>2.13.3</log4j.version>
     <slf4j.verion>2.11.0</slf4j.verion>
     <spring.version>5.2.7.RELEASE</spring.version>
     <spring.jdbc.version>2.0.0.RELEASE</spring.jdbc.version>
