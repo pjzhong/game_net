@@ -1,9 +1,10 @@
-package org.pj.core.framework.task.wrapper;
+package org.pj.module.util.task.wrapper;
 
-import org.pj.core.framework.task.TaskOneArg;
-import org.pj.core.framework.task.TaskThreeArgs;
-import org.pj.core.framework.task.TaskTwoArgs;
-import org.pj.core.framework.task.TaskVarArgs;
+import org.pj.module.util.task.TaskFourArgs;
+import org.pj.module.util.task.TaskOneArg;
+import org.pj.module.util.task.TaskThreeArgs;
+import org.pj.module.util.task.TaskTwoArgs;
+import org.pj.module.util.task.TaskVarArgs;
 
 /**
  * 把TaskXX包装成RunAble
@@ -11,7 +12,7 @@ import org.pj.core.framework.task.TaskVarArgs;
  * @author ZJP
  * @since 2021年05月16日 18:54:00
  **/
-public class GameTaskWrapper {
+public class TaskWrapper {
 
 
   public static Runnable of(Runnable run) {
@@ -28,6 +29,10 @@ public class GameTaskWrapper {
 
   public static <A, B, C> Runnable of(TaskThreeArgs<A, B, C> task, A a, B b, C c) {
     return GameTaskThreeArg.of(task, a, b, c);
+  }
+
+  public static <A, B, C, D> Runnable of(TaskFourArgs<A, B, C, D> task, A a, B b, C c, D d) {
+    return GameTaskFourArg.of(task, a, b, c, d);
   }
 
   public static Runnable ofArgs(TaskVarArgs task, Object... args) {

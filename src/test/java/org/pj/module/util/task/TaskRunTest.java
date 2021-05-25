@@ -1,4 +1,4 @@
-package org.pj.core.framework.task;
+package org.pj.module.util.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.pj.core.framework.disruptor.DisruptorThreadPool;
-import org.pj.core.framework.task.wrapper.GameTaskWrapper;
+import org.pj.module.util.task.wrapper.TaskWrapper;
 
 public class TaskRunTest {
 
@@ -29,7 +29,7 @@ public class TaskRunTest {
   @Test
   public void oneArg() throws InterruptedException {
     CountDownLatch latch = new CountDownLatch(1);
-    pool.exec("await", GameTaskWrapper.of(CountDownLatch::countDown, latch));
+    pool.exec("await", TaskWrapper.of(CountDownLatch::countDown, latch));
     assertTrue(latch.await(1, TimeUnit.SECONDS));
   }
 
@@ -37,7 +37,7 @@ public class TaskRunTest {
   public void twoArg() throws InterruptedException {
     CountDownLatch A = new CountDownLatch(1);
     CountDownLatch B = new CountDownLatch(1);
-    pool.exec("await", GameTaskWrapper.of((a, b) -> {
+    pool.exec("await", TaskWrapper.of((a, b) -> {
       a.countDown();
       b.countDown();
     }, A, B));
@@ -50,7 +50,7 @@ public class TaskRunTest {
     CountDownLatch A = new CountDownLatch(1);
     CountDownLatch B = new CountDownLatch(1);
     CountDownLatch C = new CountDownLatch(1);
-    pool.exec("await", GameTaskWrapper.of((a, b, c) -> {
+    pool.exec("await", TaskWrapper.of((a, b, c) -> {
       a.countDown();
       b.countDown();
       c.countDown();
@@ -61,12 +61,30 @@ public class TaskRunTest {
   }
 
   @Test
+  public void fourArg() throws InterruptedException {
+    CountDownLatch A = new CountDownLatch(1);
+    CountDownLatch B = new CountDownLatch(1);
+    CountDownLatch C = new CountDownLatch(1);
+    CountDownLatch D = new CountDownLatch(1);
+    pool.exec("await", TaskWrapper.of((a, b, c, d) -> {
+      a.countDown();
+      b.countDown();
+      c.countDown();
+      d.countDown();
+    }, A, B, C, D));
+    assertTrue(A.await(1, TimeUnit.SECONDS));
+    assertTrue(B.await(1, TimeUnit.SECONDS));
+    assertTrue(C.await(1, TimeUnit.SECONDS));
+    assertTrue(D.await(1, TimeUnit.SECONDS));
+  }
+
+  @Test
   public void varArg() throws InterruptedException {
     CountDownLatch A = new CountDownLatch(1);
     CountDownLatch B = new CountDownLatch(1);
     CountDownLatch C = new CountDownLatch(1);
     CountDownLatch D = new CountDownLatch(1);
-    pool.exec("await", GameTaskWrapper.ofArgs((args) -> {
+    pool.exec("await", TaskWrapper.ofArgs((args) -> {
       for (Object cdl : args) {
         CountDownLatch l = (CountDownLatch) cdl;
         l.countDown();
@@ -80,10 +98,10 @@ public class TaskRunTest {
 
   @Test
   public void oneArgRecycleTest() {
-    Runnable runnable = GameTaskWrapper.of((a) -> {
+    Runnable runnable = TaskWrapper.of((a) -> {
     }, "A");
     runnable.run();
-    Runnable after = GameTaskWrapper.of((a) -> {
+    Runnable after = TaskWrapper.of((a) -> {
     }, "A");
     assertEquals(runnable, after);
     after.run();
@@ -91,11 +109,11 @@ public class TaskRunTest {
 
   @Test
   public void twoArgRecycleTest() {
-    Runnable runnable = GameTaskWrapper.of((a, b) -> {
+    Runnable runnable = TaskWrapper.of((a, b) -> {
     }, "A", "B");
     runnable.run();
 
-    Runnable after = GameTaskWrapper.of((a, b) -> {
+    Runnable after = TaskWrapper.of((a, b) -> {
     }, "A", "B");
     assertEquals(runnable, after);
     after.run();
@@ -103,23 +121,35 @@ public class TaskRunTest {
 
   @Test
   public void threeArgRecycleTest() {
-    Runnable runnable = GameTaskWrapper.of((a, b, c) -> {
+    Runnable runnable = TaskWrapper.of((a, b, c) -> {
     }, "A", "B", "C");
     runnable.run();
 
-    Runnable after = GameTaskWrapper.of((a, b, c) -> {
+    Runnable after = TaskWrapper.of((a, b, c) -> {
     }, "A", "B", "C");
     assertEquals(runnable, after);
     after.run();
   }
 
   @Test
-  public void varArgRecycleTest() throws InterruptedException {
-    Runnable runnable = GameTaskWrapper.ofArgs((args) -> {
+  public void fourArgRecycleTest() {
+    Runnable runnable = TaskWrapper.of((a, b, c, d) -> {
     }, "A", "B", "C", "D");
     runnable.run();
 
-    Runnable after = GameTaskWrapper.ofArgs((args) -> {
+    Runnable after = TaskWrapper.of((a, b, c, d) -> {
+    }, "A", "B", "C", "D");
+    assertEquals(runnable, after);
+    after.run();
+  }
+
+  @Test
+  public void varArgRecycleTest() throws InterruptedException {
+    Runnable runnable = TaskWrapper.ofArgs((args) -> {
+    }, "A", "B", "C", "D");
+    runnable.run();
+
+    Runnable after = TaskWrapper.ofArgs((args) -> {
     }, "A", "B", "C", "D");
     assertEquals(runnable, after);
     after.run();

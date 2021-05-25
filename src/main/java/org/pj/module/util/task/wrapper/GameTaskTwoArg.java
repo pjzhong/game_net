@@ -1,8 +1,8 @@
-package org.pj.core.framework.task.wrapper;
+package org.pj.module.util.task.wrapper;
 
 import io.netty.util.Recycler;
 import io.netty.util.Recycler.Handle;
-import org.pj.core.framework.task.TaskTwoArgs;
+import org.pj.module.util.task.TaskTwoArgs;
 
 /**
  * 将Task包装成Runnable

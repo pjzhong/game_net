@@ -1,4 +1,4 @@
-package org.pj.core.framework.task;
+package org.pj.module.util.task;
 
 /**
  * A task with One Arg
