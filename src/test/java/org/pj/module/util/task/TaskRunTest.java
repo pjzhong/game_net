@@ -84,16 +84,18 @@ public class TaskRunTest {
     CountDownLatch B = new CountDownLatch(1);
     CountDownLatch C = new CountDownLatch(1);
     CountDownLatch D = new CountDownLatch(1);
+    CountDownLatch E = new CountDownLatch(1);
     pool.exec("await", TaskWrapper.ofArgs((args) -> {
       for (Object cdl : args) {
         CountDownLatch l = (CountDownLatch) cdl;
         l.countDown();
       }
-    }, A, B, C, D));
+    }, A, B, C, D, E));
     assertTrue(A.await(1, TimeUnit.SECONDS));
     assertTrue(B.await(1, TimeUnit.SECONDS));
     assertTrue(C.await(1, TimeUnit.SECONDS));
     assertTrue(D.await(1, TimeUnit.SECONDS));
+    assertTrue(E.await(1, TimeUnit.SECONDS));
   }
 
   @Test
@@ -146,11 +148,11 @@ public class TaskRunTest {
   @Test
   public void varArgRecycleTest() throws InterruptedException {
     Runnable runnable = TaskWrapper.ofArgs((args) -> {
-    }, "A", "B", "C", "D");
+    }, "A", "B", "C", "D", "E");
     runnable.run();
 
     Runnable after = TaskWrapper.ofArgs((args) -> {
-    }, "A", "B", "C", "D");
+    }, "A", "B", "C", "D", "E");
     assertEquals(runnable, after);
     after.run();
   }

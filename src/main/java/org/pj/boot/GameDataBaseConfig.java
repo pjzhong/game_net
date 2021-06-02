@@ -29,22 +29,22 @@ public class GameDataBaseConfig {
   }
 
   /* 数据库配置 */
- /* @Bean("configDao")
+ // @Bean("configDao")
   public JdbcTemplate configJdbcTemplate(@Qualifier("configDataSource") DataSource dataSource) {
     return new JdbcTemplate(dataSource);
   }
 
-  @Bean(name = "game_mongo", destroyMethod = "closeClient")
+ // @Bean(name = "game_mongo", destroyMethod = "closeClient")
   public SimpleMongoClientDatabaseFactory simpleMongoClientDatabaseFactory(Environment env) {
     return new SimpleMongoClientDatabaseFactory(env.getRequiredProperty("mongo.url"));
   }
 
-  @Bean
+ // @Bean
   public MongoTemplate mongoTemplate(@Qualifier("game_mongo") MongoDatabaseFactory factory) {
     return new MongoTemplate(factory);
   }
 
-  @Bean(value = "configDataSource", destroyMethod = "close")
+  //@Bean(value = "configDataSource", destroyMethod = "close")
   public HikariDataSource configDataSource(Environment env) {
     HikariConfig config = new HikariConfig();
     config.setJdbcUrl(env.getRequiredProperty("db.config.url"));
@@ -54,6 +54,6 @@ public class GameDataBaseConfig {
     config.setConnectionTestQuery("select 1");
     config.setPoolName("configDataSource");
     return new HikariDataSource(config);
-  }*/
+  }
 
 }
