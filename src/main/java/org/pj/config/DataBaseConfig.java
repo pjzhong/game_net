@@ -1,4 +1,4 @@
-package org.pj.boot;
+package org.pj.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -13,20 +13,12 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+@EnableMongoRepositories(basePackages = "org.pj.module.*.dao")
+public class DataBaseConfig {
 
-public class GameDataBaseConfig {
-
-
-  @Bean
-  public SpringGameContext gameContext(GenericApplicationContext context,
-      NettyTcpServer tcpServer) {
-    SpringGameContext gameContext = new SpringGameContext(context);
-    gameContext.setEventBus(new EventBus());
-    gameContext.setTcpServer(tcpServer);
-    return gameContext;
-  }
 
   /* 数据库配置 */
  // @Bean("configDao")
@@ -34,12 +26,12 @@ public class GameDataBaseConfig {
     return new JdbcTemplate(dataSource);
   }
 
- // @Bean(name = "game_mongo", destroyMethod = "closeClient")
+ @Bean(name = "game_mongo", destroyMethod = "closeClient")
   public SimpleMongoClientDatabaseFactory simpleMongoClientDatabaseFactory(Environment env) {
     return new SimpleMongoClientDatabaseFactory(env.getRequiredProperty("mongo.url"));
   }
 
- // @Bean
+  @Bean
   public MongoTemplate mongoTemplate(@Qualifier("game_mongo") MongoDatabaseFactory factory) {
     return new MongoTemplate(factory);
   }

@@ -1,4 +1,4 @@
-package org.pj.protocols.hello;
+package org.pj.protocols.common.hello;
 
 
 import io.netty.channel.Channel;
@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.pj.core.msg.Message;
 import org.pj.core.msg.Packet;
 import org.pj.protocols.Facade;
-import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
+import org.pj.protocols.common.hello.HelloWorldProto.HelloWorld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

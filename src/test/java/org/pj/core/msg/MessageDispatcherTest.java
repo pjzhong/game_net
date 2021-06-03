@@ -27,8 +27,8 @@ import org.pj.core.net.ExampleTcpClient;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
-import org.pj.protocols.hello.HelloFacade;
-import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
+import org.pj.protocols.common.hello.HelloFacade;
+import org.pj.protocols.common.hello.HelloWorldProto.HelloWorld;
 
 public class MessageDispatcherTest {
 

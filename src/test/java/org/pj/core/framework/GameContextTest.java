@@ -1,4 +1,4 @@
-package org.pj.core.context;
+package org.pj.core.framework;
 
 import static io.netty.handler.codec.http.websocketx.WebSocketClientProtocolHandler.ClientHandshakeStateEvent.HANDSHAKE_COMPLETE;
 
@@ -12,40 +12,38 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.java_websocket.client.WebSocketClient;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pj.boot.GameBoot;
+import org.pj.config.ServerConfig;
 import org.pj.core.framework.SpringGameContext;
 import org.pj.core.msg.Message;
 import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.core.net.NettyTcpClient;
 import org.pj.core.net.init.WebSocketClientHandlerInitializer;
-import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
+import org.pj.protocols.common.hello.HelloWorldProto.HelloWorld;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.support.GenericApplicationContext;
 
+@SpringBootTest(classes = ServerConfig.class)
 public class GameContextTest {
 
-  private static SpringGameContext ctx;
-  private static GenericApplicationContext context;
+  @Autowired
+  private SpringGameContext ctx;
+  @Autowired
+  private GenericApplicationContext context;
 
-  @BeforeAll
-  public static void init() throws Exception {
-    long start = System.currentTimeMillis();
-    GameBoot boot = GameBoot.start();
-
-    ctx = boot.getGameCtx();
-    context = boot.getSpringCtx();
-    System.out.println("cost:" + (System.currentTimeMillis() - start));
+  @BeforeEach
+  private void before() throws Exception {
+    ctx.start();
   }
 
-  @AfterAll
-  public static void end() throws Exception {
+  @AfterEach
+  private void after() throws Exception {
     ctx.close();
-    context.close();
   }
-
 
   @Test
   public void echoHelloWorld() throws Exception {

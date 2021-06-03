@@ -1,4 +1,4 @@
-package org.pj.core.framework.cross;
+package org.pj.core.framework;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,43 +9,50 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.pj.boot.GameBoot;
+import org.pj.config.CrossServerConfig;
+import org.pj.config.ServerConfig;
 import org.pj.core.framework.SpringGameContext;
+import org.pj.core.framework.cross.CrossGameClient;
+import org.pj.core.framework.cross.ResultCallBackAdapter;
+import org.pj.core.framework.cross.SocketCallback;
 import org.pj.core.msg.Message;
 import org.pj.core.msg.Packet;
 import org.pj.protocols.Facade;
-import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
+import org.pj.protocols.common.hello.HelloWorldProto.HelloWorld;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.support.GenericApplicationContext;
 
-public class CrossClientTest {
 
-  private static GenericApplicationContext localCtx;
-  private static GenericApplicationContext crossCtx;
+@SpringBootTest(classes = {ServerConfig.class, CrossServerConfig.class})
+public class CrossContextTest {
 
-  private static SpringGameContext local;
-  private static SpringGameContext cross;
+  @Autowired
+  private GenericApplicationContext localCtx;
+  @Autowired
+  private GenericApplicationContext crossCtx;
 
-  @BeforeAll
-  public static void start() throws Exception {
-    GameBoot localBoot = GameBoot.start();
-    localCtx = localBoot.getSpringCtx();
-    local = localBoot.getGameCtx();
+  @Autowired
+  @Qualifier("gameContext")
+  private SpringGameContext local;
+  @Autowired
+  @Qualifier("crossContext")
+  private SpringGameContext cross;
 
-    GameBoot crossBoot = GameBoot.start("cross");
-    crossCtx = crossBoot.getSpringCtx();
-    cross = crossBoot.getGameCtx();
+  @BeforeEach
+  public void start() throws Exception {
+    local.start();
+    cross.start();
   }
 
-  @AfterAll
-  public static void close() throws Exception {
+  @AfterEach
+  public void afterAll() throws Exception {
     local.close();
     cross.close();
-
-    localCtx.close();
-    crossCtx.close();
   }
 
   @Test
@@ -66,7 +73,7 @@ public class CrossClientTest {
     });
     client.sendMessage(request);
 
-    assertTrue(latch.await(100, TimeUnit.SECONDS), "echo failed");
+    assertTrue(latch.await(1, TimeUnit.SECONDS), "echo failed");
   }
 
   @Test

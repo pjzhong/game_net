@@ -37,12 +37,15 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   private NettyTcpServer tcpServer;
   private GenericApplicationContext context;
   private DisruptorThreadPool threadPool;
-  private volatile boolean working;
+  private volatile boolean started;
 
   public SpringGameContext(GenericApplicationContext ctx) {
     context = ctx;
   }
 
+  public boolean isStarted() {
+    return started;
+  }
 
   public MessageDispatcher getDispatcher() {
     return dispatcher;
@@ -55,11 +58,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   public DisruptorThreadPool getThreadPool() {
     return threadPool;
   }
-
-  public void setEventBus(EventBus eventBus) {
-    this.eventBus = eventBus;
-  }
-
   public void setContext(GenericApplicationContext context) {
     this.context = context;
   }
@@ -71,6 +69,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   public void init() {
     threadPool = new DisruptorThreadPool();
     dispatcher = new MessageDispatcher(threadPool);
+    eventBus = new EventBus();
     initSystem();
   }
 
@@ -114,14 +113,14 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   }
 
   public void start() throws Exception {
-    if (working) {
+    if (started) {
       return;
     }
 
     init();
     startTcpServer();
 
-    working = true;
+    started = true;
     fireEvent(SystemEvent.SYSTEM_START.getType());
   }
 
@@ -158,7 +157,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   }
 
   public void doClose() throws Exception {
-    if (!working) {
+    if (!started) {
       return;
     }
 
@@ -170,7 +169,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     logger.info("shutdown tcpServer");
     tcpServer.close();
 
-    working = false;
+    started = false;
     logger.info("gameContext shutdown success");
   }
 

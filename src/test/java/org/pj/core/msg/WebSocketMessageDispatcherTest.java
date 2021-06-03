@@ -20,8 +20,8 @@ import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
 import org.pj.core.net.init.WebSocketServerHandlerInitializer;
-import org.pj.protocols.hello.HelloFacade;
-import org.pj.protocols.hello.HelloWorldProto.HelloWorld;
+import org.pj.protocols.common.hello.HelloFacade;
+import org.pj.protocols.common.hello.HelloWorldProto.HelloWorld;
 
 public class WebSocketMessageDispatcherTest {
 

@@ -1,23 +1,26 @@
-package org.pj.boot;
+package org.pj;
 
 import java.util.Arrays;
 import org.apache.commons.lang3.ArrayUtils;
+import org.pj.config.CrossServerConfig;
+import org.pj.config.ServerConfig;
 import org.pj.core.framework.SpringGameContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-public class GameBoot {
+
+public class GameBootTest {
 
   public static void main(String[] argc) throws Exception {
-    GameBoot.start(argc);
+    GameBootTest.start(argc);
   }
 
   private SpringGameContext gameCtx;
   private AnnotationConfigApplicationContext springCtx;
 
-  private GameBoot() {
+  private GameBootTest() {
   }
 
-  private GameBoot(SpringGameContext gameCtx,
+  private GameBootTest(SpringGameContext gameCtx,
       AnnotationConfigApplicationContext springCtx) {
     this.gameCtx = gameCtx;
     this.springCtx = springCtx;
@@ -31,11 +34,16 @@ public class GameBoot {
     return springCtx;
   }
 
-  public static GameBoot start() throws Exception {
-    return GameBoot.start(ArrayUtils.EMPTY_STRING_ARRAY);
+  public void close() throws Exception {
+    gameCtx.close();
+    springCtx.close();
   }
 
-  public static GameBoot start(String... argc) throws Exception {
+  public static GameBootTest start() throws Exception {
+    return GameBootTest.start(ArrayUtils.EMPTY_STRING_ARRAY);
+  }
+
+  public static GameBootTest start(String... argc) throws Exception {
     try {
       return doStart(argc);
     } catch (Throwable e) {
@@ -43,8 +51,8 @@ public class GameBoot {
     }
   }
 
-  private static GameBoot doStart(String[] argc) throws Exception {
-    GameBoot boot = new GameBoot();
+  private static GameBootTest doStart(String[] argc) throws Exception {
+    GameBootTest boot = new GameBootTest();
     boolean cross = Arrays.asList(argc).contains("cross");
     AnnotationConfigApplicationContext ctx;
     if (cross) {

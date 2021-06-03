@@ -1,10 +1,9 @@
 package org.pj;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.pj.boot.CrossServerConfig;
-import org.pj.boot.ServerConfig;
+import org.pj.config.CrossServerConfig;
+import org.pj.config.DataBaseConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -15,19 +14,12 @@ import org.springframework.context.annotation.FilterType;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(excludeFilters = @Filter(type = FilterType.REGEX,
-    pattern = "org.pj.boot.*"))
-public class SpringBootRun {
+    pattern = "org.pj.config.*"))
+public class CrossBootRun {
 
   public static void main(String[] args) {
-    boolean cross = Arrays.asList(args).contains("cross");
-    List<Class<?>> classList = new ArrayList<>();
-    classList.add(SpringBootRun.class);
-    if (cross) {
-      classList.add(CrossServerConfig.class);
-    } else {
-      classList.add(ServerConfig.class);
-    }
-
+    List<Class<?>> classList = Arrays.asList(CrossBootRun.class, CrossServerConfig.class,
+        DataBaseConfig.class);
     SpringApplication app = new SpringApplication(classList.toArray(new Class[0]));
     app.run(args);
   }
