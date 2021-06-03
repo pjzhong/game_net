@@ -9,7 +9,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import org.pj.common.NamedThreadFactory;
+import org.pj.core.framework.NamedThreadFactory;
 
 /**
  * @author zhongjp

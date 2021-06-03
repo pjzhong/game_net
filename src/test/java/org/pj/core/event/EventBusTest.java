@@ -3,7 +3,7 @@ package org.pj.core.event;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.pj.module.event.EventTestSystem;
+import org.pj.game.event.EventTestSystem;
 
 public class EventBusTest {
 

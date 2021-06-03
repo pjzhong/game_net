@@ -22,13 +22,13 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.pj.common.NamedThreadFactory;
+import org.pj.common.hello.HelloFacade;
+import org.pj.common.hello.HelloWorldProto.HelloWorld;
+import org.pj.core.framework.NamedThreadFactory;
 import org.pj.core.net.ExampleTcpClient;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
-import org.pj.protocols.common.hello.HelloFacade;
-import org.pj.protocols.common.hello.HelloWorldProto.HelloWorld;
 
 public class MessageDispatcherTest {
 

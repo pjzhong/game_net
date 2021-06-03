@@ -7,7 +7,7 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.pj.common.NamedThreadFactory;
+import org.pj.core.framework.NamedThreadFactory;
 
 public class DisruptorThreadPool {
 

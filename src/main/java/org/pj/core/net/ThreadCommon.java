@@ -1,7 +1,7 @@
 package org.pj.core.net;
 
 import io.netty.channel.nio.NioEventLoopGroup;
-import org.pj.common.NamedThreadFactory;
+import org.pj.core.framework.NamedThreadFactory;
 
 /**
  * 网络公用线程组独立变量

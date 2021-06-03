@@ -16,12 +16,12 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.pj.common.hello.HelloFacade;
+import org.pj.common.hello.HelloWorldProto.HelloWorld;
 import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.core.net.handler.MessageHandler;
 import org.pj.core.net.init.WebSocketServerHandlerInitializer;
-import org.pj.protocols.common.hello.HelloFacade;
-import org.pj.protocols.common.hello.HelloWorldProto.HelloWorld;
 
 public class WebSocketMessageDispatcherTest {
 

@@ -1,8 +1,8 @@
 package org.pj.core.framework;
 
 import javax.annotation.PostConstruct;
-import org.pj.module.avatar.conf.AvatarConfig;
-import org.pj.module.conf.ConfigSystem;
+import org.pj.game.avatar.conf.AvatarConfig;
+import org.pj.game.conf.ConfigSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

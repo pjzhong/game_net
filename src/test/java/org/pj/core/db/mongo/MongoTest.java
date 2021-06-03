@@ -5,10 +5,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.pj.config.DataBaseConfig;
+import org.pj.config.DataConfig;
 import org.pj.config.ServerConfig;
-import org.pj.module.avatar.dao.Avatar;
-import org.pj.module.avatar.dao.AvatarRepository;
+import org.pj.game.avatar.dao.Avatar;
+import org.pj.game.avatar.dao.AvatarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 @EnabledIfSystemProperty(named = "mongo", matches = "true")
-@SpringBootTest(classes = {ServerConfig.class, DataBaseConfig.class})
+@SpringBootTest(classes = {ServerConfig.class, DataConfig.class})
 public class MongoTest {
 
   @Autowired
@@ -26,7 +26,7 @@ public class MongoTest {
 
 
   @AfterEach
-  public  void close() {
+  public void close() {
     template.dropCollection(Avatar.class);
   }
 
