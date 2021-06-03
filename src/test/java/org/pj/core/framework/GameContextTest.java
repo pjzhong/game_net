@@ -96,6 +96,9 @@ public class GameContextTest {
 
     boolean suc = latch.await(1, TimeUnit.SECONDS);
     Assertions.assertTrue(suc, "Echo Failed");
+
+    client2.close();
+    client1.close();
   }
 
   @Test

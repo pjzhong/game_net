@@ -4,17 +4,14 @@ import java.util.Collections;
 import java.util.List;
 import org.pj.config.CrossServerConfig;
 import org.pj.config.DataConfig;
-import org.pj.cross.CrossPackage;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class}, scanBasePackages = {"none"})
 @Import({CrossServerConfig.class, DataConfig.class, MainRun.class})
-@ComponentScan("none")
 public class CrossBootRun {
 
   public static void main(String[] args) {
