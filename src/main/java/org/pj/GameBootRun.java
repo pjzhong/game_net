@@ -3,7 +3,7 @@ package org.pj;
 import java.util.Collections;
 import java.util.List;
 import org.pj.config.DataConfig;
-import org.pj.config.ServerConfig;
+import org.pj.config.GameServerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Import;
 
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class}, scanBasePackages = {"none"})
-@Import({ServerConfig.class, DataConfig.class, MainRun.class})
+@Import({GameServerConfig.class, DataConfig.class, MainRun.class})
 public class GameBootRun {
 
   public static void main(String[] args) {

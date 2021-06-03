@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.pj.config.DataConfig;
-import org.pj.config.ServerConfig;
+import org.pj.config.GameServerConfig;
 import org.pj.game.avatar.dao.Avatar;
 import org.pj.game.avatar.dao.AvatarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 @EnabledIfSystemProperty(named = "mongo", matches = "true")
-@SpringBootTest(classes = {ServerConfig.class, DataConfig.class})
+@SpringBootTest(classes = {GameServerConfig.class, DataConfig.class})
 public class MongoTest {
 
   @Autowired

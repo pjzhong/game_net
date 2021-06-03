@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pj.common.hello.HelloWorldProto.HelloWorld;
 import org.pj.config.CrossServerConfig;
-import org.pj.config.ServerConfig;
+import org.pj.config.GameServerConfig;
 import org.pj.core.anno.Facade;
 import org.pj.core.framework.cross.CrossGameClient;
 import org.pj.core.framework.cross.ResultCallBackAdapter;
@@ -27,7 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.support.GenericApplicationContext;
 
 
-@SpringBootTest(classes = {ServerConfig.class, CrossServerConfig.class})
+@SpringBootTest(classes = {GameServerConfig.class, CrossServerConfig.class})
 public class CrossContextTest {
 
   @Autowired

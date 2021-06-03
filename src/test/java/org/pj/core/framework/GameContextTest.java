@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pj.common.hello.HelloWorldProto.HelloWorld;
-import org.pj.config.ServerConfig;
+import org.pj.config.GameServerConfig;
 import org.pj.core.msg.Message;
 import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.core.net.NettyTcpClient;
@@ -26,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.support.GenericApplicationContext;
 
-@SpringBootTest(classes = ServerConfig.class)
+@SpringBootTest(classes = GameServerConfig.class)
 public class GameContextTest {
 
   @Autowired

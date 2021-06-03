@@ -4,7 +4,6 @@ import org.pj.common.CommonPackage;
 import org.pj.core.framework.SpringGameContext;
 import org.pj.core.net.NettyTcpServer;
 import org.pj.cross.CrossPackage;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -19,14 +18,11 @@ import org.springframework.core.env.Environment;
 @ComponentScan(basePackageClasses = {CrossPackage.class, CommonPackage.class})
 public class CrossServerConfig {
 
-  @Bean(name = "crossServer")
-  public NettyTcpServer tcpServer(Environment env) {
-    return new NettyTcpServer(env.getRequiredProperty("cross.port", Integer.class));
-  }
-
   @Bean(name = "crossContext")
   public SpringGameContext gameContext(GenericApplicationContext context,
-      @Qualifier("crossServer") NettyTcpServer tcpServer) {
+      Environment env) {
+    NettyTcpServer tcpServer = new NettyTcpServer(
+        env.getRequiredProperty("cross.port", Integer.class));
     SpringGameContext gameContext = new SpringGameContext(context);
     gameContext.setTcpServer(tcpServer);
     return gameContext;
