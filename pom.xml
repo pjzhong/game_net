@@ -192,78 +192,23 @@
 
   </dependencies>
 
+  <profiles>
+    <profile>
+      <id>game</id>
+      <properties>
+        <spring.boot.mainclass>org.pj.GameBootRun</spring.boot.mainclass>
+      </properties>
+    </profile>
+    <profile>
+      <id>cross</id>
+      <properties>
+        <spring.boot.mainclass>org.pj.CrossBootRun</spring.boot.mainclass>
+      </properties>
+    </profile>
+  </profiles>
+
   <build>
     <plugins>
-      <!--resource process -->
-<!--      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>3.0.2</version>
-        <configuration>
-          <encoding>UTF-8</encoding>
-        </configuration>
-        <executions>
-          <execution>
-            <id>copy-resources</id>
-            <phase>validate</phase>
-            <goals>
-              <goal>copy-resources</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/target/release</outputDirectory>
-              <resources>
-                &lt;!&ndash; 过滤config并输出到target目录下 &ndash;&gt;
-                <resource>
-                  <directory>src/main/resources</directory>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>-->
-<!--      &lt;!&ndash; 输出依赖的jar包 &ndash;&gt;
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.0.0</version>
-        <executions>
-          <execution>
-            <id>copy-dependencies-runtime</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/release/lib</outputDirectory>
-              <overWriteReleases>false</overWriteReleases>
-              <overWriteSnapshots>false</overWriteSnapshots>
-              <overWriteIfNewer>true</overWriteIfNewer>
-              <includeScope>runtime</includeScope>
-              &lt;!&ndash;依赖传递&ndash;&gt;
-              <excludeTransitive>false</excludeTransitive>
-            </configuration>
-          </execution>
-          <execution>
-            <id>copy-dependencies-system</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/release/lib</outputDirectory>
-              <overWriteReleases>false</overWriteReleases>
-              <overWriteSnapshots>false</overWriteSnapshots>
-              <overWriteIfNewer>true</overWriteIfNewer>
-              <includeScope>system</includeScope>
-              &lt;!&ndash;过滤依赖传递&ndash;&gt;
-              <excludeTransitive>true</excludeTransitive>
-            </configuration>
-          </execution>
-        </executions>
-
-      </plugin>-->
-
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
@@ -271,49 +216,15 @@
           <layers>
             <enabled>true</enabled>
           </layers>
+          <mainClass>${spring.boot.mainclass}</mainClass>
         </configuration>
       </plugin>
 
-
-      <!-- 打成可运行jar包 -->
-      <!--      <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-jar-plugin</artifactId>
-              <version>3.1.0</version>
-              <configuration>
-                <excludes>
-                  <exclude>**/*.jar</exclude>
-                  <exclude>**/*.properties</exclude>
-                  <exclude>**/*.sql</exclude>
-                  <exclude>**/*.xml</exclude>
-                  <exclude>**/*.css</exclude>
-                  <exclude>**/*.js</exclude>
-                  <exclude>**/*.jsp</exclude>
-                  <exclude>**/*.tld</exclude>
-                  <exclude>**/*.txt</exclude>
-                  <exclude>**/*.groovy</exclude>
-                </excludes>
-                <outputDirectory>${project.build.directory}/release</outputDirectory>
-                <archive>
-                  <manifest>
-                    <addClasspath>true</addClasspath>
-                    <classpathPrefix>lib/</classpathPrefix>
-                    <mainClass>org.pj.boot.GameBootMain</mainClass>
-                  </manifest>
-                  <manifestEntries>
-                    <Class-Path>.</Class-Path>
-                  </manifestEntries>
-                </archive>
-              </configuration>
-            </plugin>-->
-
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
         <configuration>
           <source>${maven.compiler.source}</source>
           <target>${maven.compiler.target}</target>

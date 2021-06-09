@@ -122,6 +122,8 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
     started = true;
     fireEvent(SystemEvent.SYSTEM_START.getType());
+
+    logger.info("Game started type:{}", getProperty("game.module"));
   }
 
   public void registerShutdownHook() {

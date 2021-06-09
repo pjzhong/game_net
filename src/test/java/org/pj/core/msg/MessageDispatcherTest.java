@@ -68,7 +68,7 @@ public class MessageDispatcherTest {
         .setBody(ByteString.copyFromUtf8("HelloWorld1").toByteArray());
 
 
-    int loop = 100;
+    int loop = 50;
     CountDownLatch latch = new CountDownLatch(loop * 2);
     ExampleTcpClient client = new ExampleTcpClient("localhost", 8080,
         new ProtobufSocketHandlerInitializer(new SimpleChannelInboundHandler<Message>() {
@@ -153,7 +153,7 @@ public class MessageDispatcherTest {
   public void countTcpTest() throws Exception {
     Message request = Message.valueOf().setModule(4);
 
-    int size = 100, senders = 8, total = size * senders;
+    int size = 10, senders = 8, total = size * senders;
     CountDownLatch latch = new CountDownLatch(total);
     int[] result = new int[total + 1];
     EventLoopGroup group = new NioEventLoopGroup(4, new NamedThreadFactory("count_client"));
