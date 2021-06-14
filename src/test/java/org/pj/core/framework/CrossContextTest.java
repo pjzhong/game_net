@@ -9,8 +9,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pj.common.hello.HelloWorldProto.HelloWorld;
 import org.pj.config.CrossServerConfig;
@@ -21,38 +19,34 @@ import org.pj.core.framework.cross.ResultCallBackAdapter;
 import org.pj.core.framework.cross.SocketCallback;
 import org.pj.core.msg.Message;
 import org.pj.core.msg.Packet;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestExecutionListener;
+import org.springframework.test.context.TestExecutionListeners;
 
 
 @SpringBootTest(classes = {GameServerConfig.class, CrossServerConfig.class})
-public class CrossContextTest {
+@TestExecutionListeners(CrossContextTest.class)
+public class CrossContextTest implements TestExecutionListener {
 
-  @Autowired
-  private GenericApplicationContext localCtx;
-  @Autowired
-  private GenericApplicationContext crossCtx;
+  private static SpringGameContext local;
+  private static SpringGameContext cross;
 
-  @Autowired
-  @Qualifier("gameContext")
-  private SpringGameContext local;
-  @Autowired
-  @Qualifier("crossContext")
-  private SpringGameContext cross;
 
-  @BeforeEach
-  public void start() throws Exception {
+  @Override
+  public void beforeTestClass(TestContext testContext) throws Exception {
+    local = testContext.getApplicationContext().getBean("gameContext", SpringGameContext.class);
+    cross = testContext.getApplicationContext().getBean("crossContext", SpringGameContext.class);
     local.start();
     cross.start();
   }
 
-  @AfterEach
-  public void afterAll() throws Exception {
+  @Override
+  public void afterTestClass(TestContext testContext) throws Exception {
     local.close();
     cross.close();
   }
+
 
   @Test
   public void echoTest() throws Exception {
@@ -97,7 +91,6 @@ public class CrossContextTest {
     assertTrue(latch.await(100, TimeUnit.MILLISECONDS), "echo failed");
   }
 
-  @Test
   public void syncProxyTest() {
     //TODO 尝试提供同步功能
 /*    CrossGameClient client = new CrossGameClient(local);

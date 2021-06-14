@@ -12,9 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.java_websocket.client.WebSocketClient;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.pj.common.hello.HelloWorldProto.HelloWorld;
 import org.pj.config.GameServerConfig;
@@ -22,31 +20,31 @@ import org.pj.core.msg.Message;
 import org.pj.core.net.ExampleWebSocketClient;
 import org.pj.core.net.NettyTcpClient;
 import org.pj.core.net.init.WebSocketClientHandlerInitializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.test.context.TestContext;
+import org.springframework.test.context.TestExecutionListener;
+import org.springframework.test.context.TestExecutionListeners;
 
 @SpringBootTest(classes = GameServerConfig.class)
-public class GameContextTest {
+@TestExecutionListeners(GameContextTest.class)
+public class GameContextTest implements TestExecutionListener {
 
-  @Autowired
-  private SpringGameContext ctx;
-  @Autowired
-  private GenericApplicationContext context;
+  private static SpringGameContext ctx;
 
-  @BeforeEach
-  private void before() throws Exception {
+  @Override
+  public void beforeTestClass(TestContext testContext) throws Exception {
+    ctx = testContext.getApplicationContext().getBean(SpringGameContext.class);
     ctx.start();
   }
 
-  @AfterEach
-  private void after() throws Exception {
+  @Override
+  public void afterTestClass(TestContext testContext) throws Exception {
     ctx.close();
   }
 
   @Test
   public void echoHelloWorld() throws Exception {
-    if (context.getEnvironment().getProperty("game.isSocket", Boolean.class, false)) {
+    if (ctx.getEnvironment().getProperty("game.isSocket", Boolean.class, false)) {
       return;
     }
 
@@ -103,7 +101,7 @@ public class GameContextTest {
 
   @Test
   public void testErr() throws Exception {
-    if (context.getEnvironment().getProperty("game.isSocket", Boolean.class, false)) {
+    if (ctx.getEnvironment().getProperty("game.isSocket", Boolean.class, false)) {
       return;
     }
 

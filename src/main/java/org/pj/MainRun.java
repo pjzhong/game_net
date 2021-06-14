@@ -17,7 +17,8 @@ public class MainRun implements CommandLineRunner {
 
   @Override
   public void run(String... args) throws Exception {
-    gameContext.start();
     gameContext.registerShutdownHook();
+    gameContext.start();
+
   }
 }

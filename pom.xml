@@ -192,21 +192,6 @@
 
   </dependencies>
 
-  <profiles>
-    <profile>
-      <id>game</id>
-      <properties>
-        <spring.boot.mainclass>org.pj.GameBootRun</spring.boot.mainclass>
-      </properties>
-    </profile>
-    <profile>
-      <id>cross</id>
-      <properties>
-        <spring.boot.mainclass>org.pj.CrossBootRun</spring.boot.mainclass>
-      </properties>
-    </profile>
-  </profiles>
-
   <build>
     <plugins>
       <plugin>
@@ -216,7 +201,7 @@
           <layers>
             <enabled>true</enabled>
           </layers>
-          <mainClass>${spring.boot.mainclass}</mainClass>
+          <mainClass>org.pj.GameBootRun</mainClass>
         </configuration>
       </plugin>
 

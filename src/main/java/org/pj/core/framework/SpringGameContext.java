@@ -10,12 +10,13 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import javax.annotation.Priority;
 import org.apache.commons.lang3.ArrayUtils;
-import org.pj.core.anno.Facade;
 import org.pj.core.ShutdownHook;
+import org.pj.core.anno.Facade;
 import org.pj.core.event.EventBus;
 import org.pj.core.framework.disruptor.DisruptorThreadPool;
 import org.pj.core.msg.MessageDispatcher;
 import org.pj.core.net.NettyTcpServer;
+import org.pj.core.net.ThreadCommon;
 import org.pj.core.net.handler.MessageHandler;
 import org.pj.core.net.init.ProtobufSocketHandlerInitializer;
 import org.pj.core.net.init.WebSocketServerHandlerInitializer;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.env.Environment;
 
 public class SpringGameContext implements AutoCloseable, BeanFactory {
 
@@ -37,10 +39,15 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   private NettyTcpServer tcpServer;
   private GenericApplicationContext context;
   private DisruptorThreadPool threadPool;
+  private ThreadCommon threadCommon;
   private volatile boolean started;
 
   public SpringGameContext(GenericApplicationContext ctx) {
     context = ctx;
+  }
+
+  public GenericApplicationContext getContext() {
+    return context;
   }
 
   public boolean isStarted() {
@@ -58,6 +65,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   public DisruptorThreadPool getThreadPool() {
     return threadPool;
   }
+
   public void setContext(GenericApplicationContext context) {
     this.context = context;
   }
@@ -70,6 +78,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     threadPool = new DisruptorThreadPool();
     dispatcher = new MessageDispatcher(threadPool);
     eventBus = new EventBus();
+    threadCommon = new ThreadCommon();
     initSystem();
   }
 
@@ -112,22 +121,22 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     }
   }
 
-  public void start() throws Exception {
+  public synchronized void start() throws Exception {
     if (started) {
       return;
     }
+    started = true;
 
     init();
     startTcpServer();
 
-    started = true;
     fireEvent(SystemEvent.SYSTEM_START.getType());
 
     logger.info("Game started type:{}", getProperty("game.module"));
   }
 
   public void registerShutdownHook() {
-    Thread shutdownHook = new ShutdownHook(context);
+    Thread shutdownHook = new ShutdownHook(this);
     Runtime.getRuntime().addShutdownHook(shutdownHook);
   }
 
@@ -142,7 +151,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     } else {
       handler = new WebSocketServerHandlerInitializer(channelHandlers);
     }
-    tcpServer.startUp(handler);
+    tcpServer.startUp(handler, threadCommon);
   }
 
   public String getProperty(String key) {
@@ -158,7 +167,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     doClose();
   }
 
-  public void doClose() throws Exception {
+  private void doClose() throws Exception {
     if (!started) {
       return;
     }
@@ -170,7 +179,7 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
     destroySystems();
     logger.info("shutdown tcpServer");
     tcpServer.close();
-
+    threadCommon.close();
     started = false;
     logger.info("gameContext shutdown success");
   }
@@ -273,4 +282,9 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   public String[] getAliases(String name) {
     return context.getAliases(name);
   }
+
+  public Environment getEnvironment() {
+    return context.getEnvironment();
+  }
+
 }

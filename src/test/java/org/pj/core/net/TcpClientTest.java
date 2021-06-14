@@ -24,11 +24,13 @@ import org.pj.core.net.init.WebSocketServerHandlerInitializer;
 
 public class TcpClientTest {
 
+  private static ThreadCommon common;
   private static NettyTcpServer server;
   private static NettyTcpServer webSocketServer;
 
   @BeforeAll
   public static void start() throws Exception {
+    common = new ThreadCommon();
     server = new NettyTcpServer(8080);
     server.startUp(new ProtobufSocketHandlerInitializer(
         new SimpleChannelInboundHandler<Message>() {
@@ -41,7 +43,7 @@ public class TcpClientTest {
           public void channelReadComplete(ChannelHandlerContext ctx) {
             ctx.flush();
           }
-        }));
+        }), common);
 
     webSocketServer = new NettyTcpServer(8081);
     webSocketServer.startUp(new WebSocketServerHandlerInitializer(
@@ -55,13 +57,14 @@ public class TcpClientTest {
           public void channelReadComplete(ChannelHandlerContext ctx) {
             ctx.flush();
           }
-        }));
+        }), common);
   }
 
   @AfterAll
   public static void close() {
     server.close();
     webSocketServer.close();
+    common.close();
   }
 
 

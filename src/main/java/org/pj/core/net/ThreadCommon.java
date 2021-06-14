@@ -16,7 +16,7 @@ public class ThreadCommon {
    * <p>注意：主线线程组线程数不可随意添加，添加要说明用在哪。</p>
    * <p>1.接收客户端连接</p>
    */
-  public static final NioEventLoopGroup BOSS = new NioEventLoopGroup(1,
+  private final NioEventLoopGroup boss = new NioEventLoopGroup(1,
       new NamedThreadFactory("BOSS"));
 
 
@@ -25,8 +25,27 @@ public class ThreadCommon {
    * <p>如果单服占用整台物理机则乘2否则与核心数保持一致或更少</p>
    * <p>1.客户端连接</p>
    */
-  public static final NioEventLoopGroup WORKER = new NioEventLoopGroup(
+  private final NioEventLoopGroup worker = new NioEventLoopGroup(
       Runtime.getRuntime().availableProcessors(),
       new NamedThreadFactory("WORKER"));
 
+  public ThreadCommon() {
+  }
+
+  public NioEventLoopGroup getBoss() {
+    return boss;
+  }
+
+  public NioEventLoopGroup getWorker() {
+    return worker;
+  }
+
+  public void close() {
+    if (boss != null) {
+      boss.shutdownGracefully();
+    }
+    if (worker != null) {
+      worker.shutdownGracefully();
+    }
+  }
 }

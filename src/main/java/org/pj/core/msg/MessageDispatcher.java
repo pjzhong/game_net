@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.ObjectUtils;
 import org.pj.core.framework.NamedThreadFactory;
@@ -143,10 +142,7 @@ public class MessageDispatcher implements AutoCloseable {
   public void close() {
     try {
       work = false;
-      while (0 < msgCount.get()) {
-        logger.info("stopping dispatcher, msgCount:{}", msgCount.get());
-        TimeUnit.SECONDS.sleep(1);
-      }
+      disruptorPool.shutdown();
     } catch (Exception e) {
       logger.info("stooping dispatcher error", e);
     }

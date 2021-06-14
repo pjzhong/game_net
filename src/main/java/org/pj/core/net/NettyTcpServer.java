@@ -17,16 +17,23 @@ public class NettyTcpServer implements AutoCloseable {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private ServerBootstrap bootstrap;
   private Channel channel;
+  /** For Self Start Up */
+  private ThreadCommon common;
 
 
   public NettyTcpServer(int port) {
     this.port = port;
   }
 
+
   public void startUp(ChannelHandler handler) throws Exception {
+    startUp(handler, common = new ThreadCommon());
+  }
+
+  public void startUp(ChannelHandler handler, ThreadCommon common) throws Exception {
     bootstrap = new ServerBootstrap();
 
-    bootstrap.group(ThreadCommon.BOSS, ThreadCommon.WORKER);
+    bootstrap.group(common.getBoss(), common.getWorker());
     bootstrap.channel(NioServerSocketChannel.class);
     bootstrap.option(ChannelOption.SO_BACKLOG, 1024);
     bootstrap.childOption(ChannelOption.TCP_NODELAY, true);
@@ -50,9 +57,14 @@ public class NettyTcpServer implements AutoCloseable {
 
   @Override
   public void close() {
-    if (bootstrap == null) {
-      return;
+    if (channel != null) {
+      channel.close();
     }
-    channel.close();
+    if (bootstrap != null) {
+      bootstrap.clone();
+    }
+    if (common != null) {
+      common.close();
+    }
   }
 }
