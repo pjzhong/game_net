@@ -20,7 +20,7 @@ public class DisruptorThreadPool {
 
   public DisruptorThreadPool() {
     this(Runtime.getRuntime().availableProcessors(), 4096,
-        new NamedThreadFactory("game--disruptor-thread"));
+        new NamedThreadFactory("game-disruptor-thread"));
   }
 
   public DisruptorThreadPool(int poolSize, int buffSize, NamedThreadFactory factory) {

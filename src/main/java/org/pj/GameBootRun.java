@@ -17,14 +17,12 @@ public class GameBootRun {
     String model = args[0];
     List<Class<?>> configClass = new ArrayList<>();
     configClass.add(GameBootRun.class);
+    configClass.add(MainRun.class);
+    configClass.add(DataConfig.class);
     if (model.equals("cross")) {
       configClass.add(CrossServerConfig.class);
-      configClass.add(DataConfig.class);
-      configClass.add(MainRun.class);
     } else {
       configClass.add(GameServerConfig.class);
-      configClass.add(DataConfig.class);
-      configClass.add(MainRun.class);
     }
     SpringApplication app = new SpringApplication(configClass.toArray(new Class[0]));
     app.run(args);
