@@ -9,10 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import javax.annotation.Priority;
-import org.apache.commons.lang3.ArrayUtils;
 import org.pj.core.ShutdownHook;
 import org.pj.core.anno.Facade;
-import org.pj.core.event.EventBus;
 import org.pj.core.framework.disruptor.DisruptorThreadPool;
 import org.pj.core.msg.MessageDispatcher;
 import org.pj.core.net.NettyTcpServer;
@@ -34,7 +32,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
   private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  private EventBus eventBus;
   private MessageDispatcher dispatcher;
   private NettyTcpServer tcpServer;
   private GenericApplicationContext context;
@@ -77,7 +74,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
   public void init() {
     threadPool = new DisruptorThreadPool();
     dispatcher = new MessageDispatcher(threadPool);
-    eventBus = new EventBus();
     threadCommon = new ThreadCommon();
     initSystem();
   }
@@ -94,7 +90,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
     for (ISystem sys : systemList) {
       sys.init();
-      eventBus.registerEvent(sys);
       logger.info("{} created", sys.getClass().getSimpleName());
     }
 
@@ -104,9 +99,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
       dispatcher.registerHandler(obj);
       logger.info("{} created", obj.getClass().getSimpleName());
     }
-
-    //触发全部系统初始完毕事件
-    fireEvent(SystemEvent.AFTER_INIT.getType());
   }
 
   private int getPriority(ISystem obj) {
@@ -129,8 +121,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
 
     init();
     startTcpServer();
-
-    fireEvent(SystemEvent.SYSTEM_START.getType());
 
     logger.info("Game started type:{}", getProperty("game.module"));
   }
@@ -193,15 +183,6 @@ public class SpringGameContext implements AutoCloseable, BeanFactory {
         logger.error(sys.getClass().getSimpleName() + " destroy error", e);
       }
     }
-  }
-
-  /*    事件方法            */
-  public void fireEvent(int type) {
-    eventBus.fireEvent(type, ArrayUtils.EMPTY_OBJECT_ARRAY);
-  }
-
-  public void fireEvent(int type, Object... params) {
-    eventBus.fireEvent(type, params);
   }
 
   /*    Spring 代理方法            */
