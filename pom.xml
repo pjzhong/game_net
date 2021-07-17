@@ -105,17 +105,17 @@
         </dependency>-->
 
 
-    <!-- MySql 数据库 -->
-    <dependency>
-      <groupId>com.zaxxer</groupId>
-      <artifactId>HikariCP</artifactId>
-    </dependency>
+    <!--    &lt;!&ndash; MySql 数据库 &ndash;&gt;
+        <dependency>
+          <groupId>com.zaxxer</groupId>
+          <artifactId>HikariCP</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>${mysql.driver.version}</version>
-    </dependency>
+        <dependency>
+          <groupId>mysql</groupId>
+          <artifactId>mysql-connector-java</artifactId>
+          <version>${mysql.driver.version}</version>
+        </dependency>-->
 
     <!-- netty TODO 有空精简下，不要用all-->
 <!--    <dependency>
