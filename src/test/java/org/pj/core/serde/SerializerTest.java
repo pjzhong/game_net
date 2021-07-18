@@ -95,7 +95,7 @@ public class SerializerTest {
   }
 
   @Test
-  void strSerdeTest() {
+  void strSerdeTest() throws NoSuchFieldException {
     String str = "Hello World!";
     serializer.writeObject(buf, str);
     assertEquals(str, serializer.read(buf));
