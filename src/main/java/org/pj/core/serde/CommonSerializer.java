@@ -40,7 +40,6 @@ public class CommonSerializer implements Serializer<Object> {
   public static final int STRING_ID = 8;
   public static final int ARRAY_ID = 9;
 
-  private ArraySerializer arraySerializer;
   /** 序列化注册 [目标类型 -> 序列化实现] */
   private Map<Class<?>, Serializer<?>> serializers;
   /** [类型ID, 序列化实现] */
@@ -54,7 +53,6 @@ public class CommonSerializer implements Serializer<Object> {
     clazz2Id = new HashMap<>();
     commonType();
     registerWrapper();
-    arraySerializer = new ArraySerializer(this);
 
   }
 
@@ -219,7 +217,7 @@ public class CommonSerializer implements Serializer<Object> {
       serializer.writeObject(buf, object);
     } catch (Exception e) {
       buf.writerIndex(writeIdx);
-      throw new RuntimeException("类型:" + clazz + ",序列化错误");
+      throw new RuntimeException("类型:" + clazz + ",序列化错误", e);
     }
 
 

@@ -10,14 +10,21 @@ import org.pj.core.util.NettyByteBufUtil;
  *
  * <pre>
  *   一维数组:
- *    +---------+--------+--------+-----+----+
- *    + 维度总数 | 维度1长 | 类型ID  |元素1|元素1|
- *    +--------+--------+--------+-----+----+
+ *    +----------+--------+--------+-----+-----+
+ *    + 维度总数| 维度1长| 类型ID |元素1|元素2|
+ *    +--------+--------+--------+-----+-----+
+ *
+ *  二维数组(都压缩成一维数组)
+ *      +-----------+--------+--------+-------+-------+-------+-------+-------+
+ *      + 维度总数 | 维度1长| 维度2长| 类型ID|元素1_0|元素1_1|元素2_0|元素2_1|
+ *      +---------+--------+--------+-------+-------+-------+-------+-------+
  *    维度总数:1-5字节, 使用varint32编码
  *    维度1长:1-5字节, 使用varint32编码
  *    类型ID:1-5字节, 使用varint32编码
  *    元素:实现决定
  * </pre>
+ * <p>1.数组长宽必须一致</p>
+ * <p>2.暂时不支持PrimitiveWrapper数组，序列化时会全部转化为对应的基础类型</p>
  *
  * 与{@link CommonSerializer} 组合使用
  *
@@ -58,14 +65,14 @@ public class ArraySerializer implements Serializer<Object> {
   }
 
   /**
-   * 填充每个维度的长度
+   * 获取和检查每个维度的长度
    *
    * @param array 目标数据
    * @param dimension 当前维度
    * @param dimensions 维度记录
    * @since 2021年07月18日 17:12:22
    */
-  static void collectDimensions(Object array, int dimension, int[] dimensions) {
+  private static void collectDimensions(Object array, int dimension, int[] dimensions) {
     boolean elementsAreArrays = dimension < dimensions.length - 1;
     for (int i = 0, s = Array.getLength(array); i < s; ++i) {
       Object element = Array.get(array, i);
@@ -105,13 +112,8 @@ public class ArraySerializer implements Serializer<Object> {
         throw new RuntimeException("类型ID:" + typeId + ",没有注册");
       }
 
-      Serializer<Object> eleSerializer = serializer.getSerializer(componentType);
-      if (eleSerializer == null) {
-        throw new RuntimeException("类型:" + componentType + ",没有序列化实现");
-      }
-
       Object array = Array.newInstance(componentType, dimensions);
-      readArray(eleSerializer, buf, array, 0, dimensions);
+      readArray(buf, array, 0, dimensions);
       return array;
     }
   }
@@ -138,8 +140,7 @@ public class ArraySerializer implements Serializer<Object> {
       throw new RuntimeException("类型:" + object.getClass() + ",没有注册");
     }
     NettyByteBufUtil.writeInt32(buf, typeId);
-    Serializer<Object> elementSerializer = serializer.getSerializer(componentType);
-    writeArray(buf, object, elementSerializer, 0, dimensions);
+    writeArray(buf, object, 0, dimensions);
   }
 
   /**
@@ -147,12 +148,11 @@ public class ArraySerializer implements Serializer<Object> {
    *
    * @param buf 目标buff
    * @param array 目标数据
-   * @param serializer 序列化实现
    * @param dim 维度
    * @param dimensions 各维度长度
    * @since 2021年07月18日 20:17:35
    */
-  private void writeArray(ByteBuf buf, Object array, Serializer<Object> serializer, int dim,
+  private void writeArray(ByteBuf buf, Object array, int dim,
       int[] dimensions) {
     int length = dimensions[dim];
 
@@ -160,23 +160,32 @@ public class ArraySerializer implements Serializer<Object> {
     for (int i = 0; i < length; ++i) {
       Object element = Array.get(array, i);
       if (elementsAreArrays) {
-        writeArray(buf, element, serializer, dim + 1, dimensions);
+        writeArray(buf, element, dim + 1, dimensions);
       } else {
         serializer.writeObject(buf, element);
       }
     }
   }
 
-  private void readArray(Serializer<Object> eleSerializer, ByteBuf buf, Object array, int dim,
+  /**
+   * 从{@param buf}数组反序列化至{@param array}
+   *
+   * @param buf 目标buff
+   * @param array 目标数组
+   * @param dim 维度
+   * @param dimensions 各维度长度
+   * @since 2021年07月18日 20:17:35
+   */
+  private void readArray(ByteBuf buf, Object array, int dim,
       int[] dimensions) {
     boolean elementAreArrays = dim < dimensions.length - 1;
     int length = dimensions[dim];
-    for(int i = 0; i < length; ++i) {
-      if(elementAreArrays) {
+    for (int i = 0; i < length; ++i) {
+      if (elementAreArrays) {
         Object element = Array.get(array, i);
-        readArray(eleSerializer, buf,  element, dim + 1, dimensions);
+        readArray(buf, element, dim + 1, dimensions);
       } else {
-        Array.set(array, i, eleSerializer.readObject(buf));
+        Array.set(array, i, serializer.readObject(buf));
       }
     }
   }

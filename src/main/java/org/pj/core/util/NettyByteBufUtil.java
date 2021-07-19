@@ -13,10 +13,9 @@ public class NettyByteBufUtil {
   /**
    * Write a int32 field to the {@param buf}.
    */
-  public static void writeInt32(ByteBuf buf , int value) {
+  public static void writeInt32(ByteBuf buf, int value) {
     writeRawVarint32(buf, encodeZigZag32(value));
   }
-
 
   /**
    * read a int32 field from the {@param buf}.
@@ -25,6 +24,15 @@ public class NettyByteBufUtil {
     return decodeZigZag32(readRawVarint32(buf));
   }
 
+  /**
+   * read a int32 field from the {@param buf}, this method will reset the readerIdx after complete.
+   */
+  public static int getInt32(ByteBuf buf) {
+    int readerIdx = buf.readerIndex();
+    int res = decodeZigZag32(readRawVarint32(buf));
+    buf.readerIndex(readerIdx);
+    return res;
+  }
 
   /**
    * Write a  uint32 field to the {@param buf}.
@@ -66,11 +74,11 @@ public class NettyByteBufUtil {
         x ^= y << 28;
         x ^= (~0 << 7) ^ (~0 << 14) ^ (~0 << 21) ^ (~0 << 28);
         if (y < 0
-          && buf.readByte() < 0
-          && buf.readByte() < 0
-          && buf.readByte() < 0
-          && buf.readByte() < 0
-          && buf.readByte() < 0) {
+            && buf.readByte() < 0
+            && buf.readByte() < 0
+            && buf.readByte() < 0
+            && buf.readByte() < 0
+            && buf.readByte() < 0) {
           break fastpath; // Will throw malformedVarint()
         }
       }
@@ -99,7 +107,7 @@ public class NettyByteBufUtil {
    * to be varint encoded, thus always taking 10 bytes on the wire.)
    *
    * @param n An unsigned 32-bit integer, stored in a signed int because Java has no explicit
-   *          unsigned support.
+   * unsigned support.
    * @return A signed 32-bit integer.
    */
   public static int decodeZigZag32(final int n) {
@@ -109,7 +117,7 @@ public class NettyByteBufUtil {
   /**
    * 写入long(使用ZigZag优化和varint64)
    *
-   * @param buf   目前buff
+   * @param buf 目前buff
    * @param value 写入的内容
    * @since 2021年07月17日 09:40:01
    */
@@ -147,7 +155,7 @@ public class NettyByteBufUtil {
    * to be varint encoded, thus always taking 10 bytes on the wire.)
    *
    * @param n An unsigned 64-bit integer, stored in a signed int because Java has no explicit
-   *          unsigned support.
+   * unsigned support.
    * @return A signed 64-bit integer.
    */
   public static long decodeZigZag64(final long n) {
@@ -157,7 +165,7 @@ public class NettyByteBufUtil {
   /**
    * 写入varint64
    *
-   * @param buf   目前buff
+   * @param buf 目前buff
    * @param value 写入的内容
    * @since 2021年07月17日 09:40:01
    */
@@ -212,24 +220,24 @@ public class NettyByteBufUtil {
         x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28) ^ (~0L << 35) ^ (~0L << 42);
       } else if ((x ^= ((long) buf.readByte() << 49)) < 0L) {
         x ^=
-          (~0L << 7)
-            ^ (~0L << 14)
-            ^ (~0L << 21)
-            ^ (~0L << 28)
-            ^ (~0L << 35)
-            ^ (~0L << 42)
-            ^ (~0L << 49);
+            (~0L << 7)
+                ^ (~0L << 14)
+                ^ (~0L << 21)
+                ^ (~0L << 28)
+                ^ (~0L << 35)
+                ^ (~0L << 42)
+                ^ (~0L << 49);
       } else {
         x ^= ((long) buf.readByte() << 56);
         x ^=
-          (~0L << 7)
-            ^ (~0L << 14)
-            ^ (~0L << 21)
-            ^ (~0L << 28)
-            ^ (~0L << 35)
-            ^ (~0L << 42)
-            ^ (~0L << 49)
-            ^ (~0L << 56);
+            (~0L << 7)
+                ^ (~0L << 14)
+                ^ (~0L << 21)
+                ^ (~0L << 28)
+                ^ (~0L << 35)
+                ^ (~0L << 42)
+                ^ (~0L << 49)
+                ^ (~0L << 56);
         if (x < 0L) {
           if (buf.readByte() < 0L) {
             break fastpath; // Will throw malformedVarint()

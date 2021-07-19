@@ -16,7 +16,7 @@ import java.util.List;
  * <p>2.字段类型也需要注册进{@link CommonSerializer}, 顺序无关</p>
  * <p>3.因为接口和抽象类的存在，无法确定具体类型，所以不提供自动注册</p>
  *
- * 与{@link CommonSerializer} 组合使用
+ * 与{@link CommonSerializer} 组合使用,本体功能并不完整
  *
  * @author ZJP
  * @since 2021年07月17日 16:16:14
@@ -115,7 +115,7 @@ public class ObjectSerializer implements Serializer<Object> {
 
     for (Field field : fields) {
       try {
-        Object value = serializer.read(buf);
+        Object value = serializer.readObject(buf);
         field.set(o, value);
       } catch (Exception e) {
         throw new RuntimeException(String.format("反序列化:%s, 字段:%s 错误", clazz, field.getName()), e);
