@@ -6,18 +6,18 @@ import java.util.Objects;
 import org.pj.core.util.NettyByteBufUtil;
 
 /**
- * 通用数据序列化
+ * 通用数数组序列化
  *
  * <pre>
  *   一维数组:
- *    +----------+--------+--------+-----+-----+
- *    + 维度总数| 维度1长| 类型ID |元素1|元素2|
- *    +--------+--------+--------+-----+-----+
+ *
+ *    维度总数| 维度1长| 类型ID |元素1|元素2|
+ *
  *
  *  二维数组(都压缩成一维数组)
- *      +-----------+--------+--------+-------+-------+-------+-------+-------+
- *      + 维度总数 | 维度1长| 维度2长| 类型ID|元素1_0|元素1_1|元素2_0|元素2_1|
- *      +---------+--------+--------+-------+-------+-------+-------+-------+
+ *
+ *    维度总数|维度1长|维度2长|类型ID|元素1_0|元素1_1|元素2_0|元素2_1|
+ *
  *    维度总数:1-5字节, 使用varint32编码
  *    维度1长:1-5字节, 使用varint32编码
  *    类型ID:1-5字节, 使用varint32编码
@@ -118,6 +118,29 @@ public class ArraySerializer implements Serializer<Object> {
     }
   }
 
+  /**
+   * 从{@param buf}数组反序列化至{@param array}
+   *
+   * @param buf 目标buff
+   * @param array 目标数组
+   * @param dim 维度
+   * @param dimensions 各维度长度
+   * @since 2021年07月18日 20:17:35
+   */
+  private void readArray(ByteBuf buf, Object array, int dim,
+      int[] dimensions) {
+    boolean elementAreArrays = dim < dimensions.length - 1;
+    int length = dimensions[dim];
+    for (int i = 0; i < length; ++i) {
+      if (elementAreArrays) {
+        Object element = Array.get(array, i);
+        readArray(buf, element, dim + 1, dimensions);
+      } else {
+        Array.set(array, i, serializer.readObject(buf));
+      }
+    }
+  }
+
   @Override
   public void writeObject(ByteBuf buf, Object object) {
     if (!object.getClass().isArray()) {
@@ -163,29 +186,6 @@ public class ArraySerializer implements Serializer<Object> {
         writeArray(buf, element, dim + 1, dimensions);
       } else {
         serializer.writeObject(buf, element);
-      }
-    }
-  }
-
-  /**
-   * 从{@param buf}数组反序列化至{@param array}
-   *
-   * @param buf 目标buff
-   * @param array 目标数组
-   * @param dim 维度
-   * @param dimensions 各维度长度
-   * @since 2021年07月18日 20:17:35
-   */
-  private void readArray(ByteBuf buf, Object array, int dim,
-      int[] dimensions) {
-    boolean elementAreArrays = dim < dimensions.length - 1;
-    int length = dimensions[dim];
-    for (int i = 0; i < length; ++i) {
-      if (elementAreArrays) {
-        Object element = Array.get(array, i);
-        readArray(buf, element, dim + 1, dimensions);
-      } else {
-        Array.set(array, i, serializer.readObject(buf));
       }
     }
   }

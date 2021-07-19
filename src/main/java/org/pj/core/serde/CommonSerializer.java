@@ -23,6 +23,8 @@ import org.pj.core.util.NettyByteBufUtil;
  * Array:9
  * </pre>
  *
+ * 此类提供整合功能和类型ID实现，内容的序列化和反序列化交给Serializer的子类去实现
+ *
  * @author ZJP
  * @since 2021年07月17日 16:30:05
  **/
@@ -40,10 +42,10 @@ public class CommonSerializer implements Serializer<Object> {
   public static final int STRING_ID = 8;
   public static final int ARRAY_ID = 9;
 
+  /** [类型ID, 具体类型] */
+  private Map<Integer, Class<?>> id2Clazz;
   /** 序列化注册 [目标类型 -> 序列化实现] */
   private Map<Class<?>, Serializer<?>> serializers;
-  /** [类型ID, 序列化实现] */
-  private Map<Integer, Class<?>> id2Clazz;
   /** [具体类型, 类型ID] */
   private Map<Class<?>, Integer> clazz2Id;
 
@@ -52,7 +54,7 @@ public class CommonSerializer implements Serializer<Object> {
     id2Clazz = new HashMap<>();
     clazz2Id = new HashMap<>();
     commonType();
-    registerWrapper();
+    registerWrapperType();
 
   }
 
@@ -87,28 +89,29 @@ public class CommonSerializer implements Serializer<Object> {
   }
 
   /**
-   * 基础包装类型
+   * 注册包装类型
+   *
+   * 如:把包装类导向基础类(包装类指向基础类类型的ID和序列化实现)
+   * <p>Integer -> int</p>
+   * <p>Double -> double</p>
    *
    * @since 2021年07月18日 10:31:21
    */
-  private void registerWrapper() {
-    serializers.put(Byte.class, serializers.get(Byte.TYPE));
-    serializers.put(Short.class, serializers.get(Short.TYPE));
-    serializers.put(Integer.class, serializers.get(Integer.TYPE));
-    serializers.put(Long.class, serializers.get(Long.TYPE));
-    serializers.put(Float.class, serializers.get(Float.TYPE));
-    serializers.put(Double.class, serializers.get(Double.TYPE));
-    serializers.put(Character.class, serializers.get(Character.TYPE));
-
-    clazz2Id.put(Byte.class, BYTE_ID);
-    clazz2Id.put(Short.class, SHORT_ID);
-    clazz2Id.put(Integer.class, INTEGER_ID);
-    clazz2Id.put(Long.class, LONG_ID);
-    clazz2Id.put(Float.class, FLOAT_ID);
-    clazz2Id.put(Double.class, DOUBLE_ID);
-    clazz2Id.put(Character.class, CHARACTER_ID);
+  private void registerWrapperType() {
+    linkTo(Byte.class, Byte.TYPE);
+    linkTo(Short.class, Short.TYPE);
+    linkTo(Integer.class, Integer.TYPE);
+    linkTo(Long.class, Long.TYPE);
+    linkTo(Float.class, Float.TYPE);
+    linkTo(Double.class, Double.TYPE);
+    linkTo(Character.class, Character.TYPE);
   }
 
+  /**
+   * 注册九种基础类型,九种类型应该在大部分都会有相似的概念
+   *
+   * @since 2021年07月19日 23:00:35
+   */
   private void commonType() {
     registerSerializer(NULL_ID, NullSerializer.class, NullSerializer.INSTANCE);
     registerSerializer(BYTE_ID, Byte.TYPE, new ByteSerializer());
@@ -159,6 +162,30 @@ public class CommonSerializer implements Serializer<Object> {
       throw new RuntimeException(String.format("%s,%s 类型ID发生冲突", old, clazz));
     }
     clazz2Id.put(clazz, id);
+  }
+
+  /**
+   * 类型绑定
+   *
+   * 如:把包装类导向基础类(包装类指向基础类的ID和序列化实现)
+   * <p>Integer -> int</p>
+   * <p>Double -> double</p>
+   * <p>ArrayList -> Collection</p>
+   * <p>List -> Collection</p>
+   *
+   * 注意:序列化之后，原有信息会被抛弃。如何LinkHashMap会变成HashMap。如果想保留，请使用{@link org.pj.core.serde.CommonSerializer#registerSerializer}
+   *
+   * @since 2021年07月18日 10:31:21
+   */
+  public void linkTo(Class<?> type, Class<?> targetType) {
+    Serializer<?> serializer = serializers.get(targetType);
+    Objects.requireNonNull(serializer);
+
+    Integer targetTypeId = clazz2Id.get(targetType);
+    Objects.requireNonNull(targetTypeId);
+
+    serializers.put(type, serializer);
+    clazz2Id.put(type, targetTypeId);
   }
 
 
