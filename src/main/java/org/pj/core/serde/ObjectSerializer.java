@@ -69,39 +69,52 @@ public class ObjectSerializer implements Serializer<Object> {
    * @since 2021年07月18日 11:09:50
    */
   public void register(Class<?> clazz) {
-    List<Field> fields = null;
-
-    for (Class<?> cls = clazz; cls != Object.class; cls = cls.getSuperclass()) {
-      for (Field f : clazz.getDeclaredFields()) {
-        int modifier = f.getModifiers();
-        if (Modifier.isStatic(modifier) || Modifier.isFinal(modifier) || Modifier
-            .isTransient(modifier)) {
-          continue;
-        }
-
-        if (fields == null) {
-          fields = new ArrayList<>();
-        }
-
-        fields.add(f);
-      }
-    }
-
-    if (fields == null) {
-      fields = Collections.emptyList();
-    } else {
-      fields.sort(Comparator.comparing(Field::getName));
-      fields.forEach(f -> f.setAccessible(true));
-    }
-
-    this.fields = fields;
-
     try {
       constructor = clazz.getDeclaredConstructor();
       constructor.setAccessible(true);
     } catch (Exception e) {
       throw new RuntimeException("类型:" + clazz + ",缺少无参构造方法");
     }
+
+    //所有字段
+    List<Field> fields = null;
+    //当前类的字段，不包含父类
+    List<Field> currentField = null;
+    for (Class<?> cls = clazz; cls != Object.class; cls = cls.getSuperclass()) {
+      if (currentField != null) {
+        currentField.clear();
+      }
+      for (Field f : cls.getDeclaredFields()) {
+        int modifier = f.getModifiers();
+        if (Modifier.isStatic(modifier) || Modifier.isFinal(modifier) || Modifier
+            .isTransient(modifier)) {
+          continue;
+        }
+
+        if (currentField == null) {
+          currentField = new ArrayList<>();
+        }
+
+        currentField.add(f);
+      }
+
+      //汇总，子类字段顺序不干扰父类的
+      if (currentField != null && !currentField.isEmpty()) {
+        currentField.sort(Comparator.comparing(Field::getName));
+        if (fields == null) {
+          fields = new ArrayList<>();
+        }
+        fields.addAll(0, currentField);
+      }
+    }
+
+    if (fields == null) {
+      fields = Collections.emptyList();
+    } else {
+      fields.forEach(f -> f.setAccessible(true));
+    }
+
+    this.fields = fields;
   }
 
   @Override

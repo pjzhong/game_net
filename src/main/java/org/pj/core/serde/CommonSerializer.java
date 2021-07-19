@@ -177,14 +177,14 @@ public class CommonSerializer implements Serializer<Object> {
   public Object readObject(ByteBuf buf) {
     int readerIndex = buf.readerIndex();
     try {
-      int type = NettyByteBufUtil.readInt32(buf);
-      Class<?> clazz = id2Clazz.get(type);
+      int typeId = NettyByteBufUtil.readInt32(buf);
+      Class<?> clazz = id2Clazz.get(typeId);
       if (clazz == null) {
-        throw new NullPointerException("类型ID:" + type + "，未注册");
+        throw new NullPointerException("类型ID:" + typeId + "，未注册");
       }
       Serializer<?> serializer = serializers.get(clazz);
       if (serializer == null) {
-        throw new NullPointerException("类型ID:" + type + "，未注册");
+        throw new NullPointerException("类型ID:" + typeId + "，未注册");
       }
       return serializer.readObject(buf);
     } catch (Exception e) {
@@ -208,12 +208,12 @@ public class CommonSerializer implements Serializer<Object> {
         throw new RuntimeException("类型:" + clazz + "，未注册");
       }
 
-      Integer id = clazz2Id.get(clazz);
-      if (id == null) {
+      Integer typeId = clazz2Id.get(clazz);
+      if (typeId == null) {
         throw new RuntimeException("类型:" + clazz + "，没有类型ID");
       }
 
-      NettyByteBufUtil.writeInt32(buf, id);
+      NettyByteBufUtil.writeInt32(buf, typeId);
       serializer.writeObject(buf, object);
     } catch (Exception e) {
       buf.writerIndex(writeIdx);

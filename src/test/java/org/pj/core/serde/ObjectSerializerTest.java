@@ -1,6 +1,7 @@
 package org.pj.core.serde;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.netty.buffer.ByteBuf;
@@ -8,6 +9,7 @@ import io.netty.buffer.Unpooled;
 import java.util.AbstractList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -96,6 +98,33 @@ public class ObjectSerializerTest {
 
     ComposeObj res = serializer.read(buf);
     assertEquals(composeObj, res);
+  }
+
+  @Test
+  void inheritanceTest() {
+    serializer.registerSerializer(11, PrimitiveObj.class);
+    serializer.registerSerializer(12, WrapperObj.class);
+    serializer.registerSerializer(13, Child.class);
+
+    PrimitiveObj pri = new PrimitiveObj();
+    pri.l = Long.MIN_VALUE;
+
+    WrapperObj wrap = new WrapperObj();
+    wrap.str = "Hello World!";
+    wrap.l = null;
+
+    Child child = new Child();
+    child.pri = pri;
+    child.wrap = wrap;
+    child.a = ThreadLocalRandom.current().nextInt();
+    child.A = ThreadLocalRandom.current().nextInt();
+    child.ignore = ThreadLocalRandom.current().nextInt() + 1;
+
+    serializer.writeObject(buf, child);
+
+    Child res = serializer.read(buf);
+    assertEquals(child, res);
+    assertNotEquals(child.ignore, res.ignore);
   }
 
   /**
@@ -223,6 +252,40 @@ public class ObjectSerializerTest {
     @Override
     public int hashCode() {
       return Objects.hash(pri, wrap);
+    }
+  }
+
+  /**
+   * 继承测试
+   *
+   * @author ZJP
+   * @since 2021年07月18日 13:45:35
+   **/
+  private final static class Child extends ComposeObj {
+
+    public int A;
+    public Integer a;
+    public transient int ignore;
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      if (!super.equals(o)) {
+        return false;
+      }
+      Child child = (Child) o;
+      return A == child.A &&
+          Objects.equals(a, child.a);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(super.hashCode(), A, a);
     }
   }
 
