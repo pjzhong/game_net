@@ -25,16 +25,6 @@ public class NettyByteBufUtil {
   }
 
   /**
-   * read a int32 field from the {@param buf}, this method will reset the readerIdx after complete.
-   */
-  public static int getInt32(ByteBuf buf) {
-    int readerIdx = buf.readerIndex();
-    int res = decodeZigZag32(readRawVarint32(buf));
-    buf.readerIndex(readerIdx);
-    return res;
-  }
-
-  /**
    * Write a  uint32 field to the {@param buf}.
    */
   public static void writeRawVarint32(ByteBuf buf, int value) {
