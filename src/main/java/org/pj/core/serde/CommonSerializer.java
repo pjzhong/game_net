@@ -10,7 +10,7 @@ import org.pj.core.util.NettyByteBufUtil;
  * 序列化组合实现,业务主要入口
  *
  * <pre>
- * 基本类型ID:
+ * 基本类型ID(部分语言应该有类似的概念):
  * null:0
  * Byte:1
  * Short:2
@@ -22,10 +22,9 @@ import org.pj.core.util.NettyByteBufUtil;
  * String:8
  * Array:9
  * </pre>
- *
+ * <p>集合就按需注册吧，不写死了</p>
  * 此类提供整合功能和类型ID实现，内容的序列化和反序列化交给Serializer的子类去实现
  *
- * @author ZJP
  * @since 2021年07月17日 16:30:05
  **/
 public class CommonSerializer implements Serializer<Object> {

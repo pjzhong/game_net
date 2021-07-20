@@ -9,7 +9,6 @@ import org.pj.core.util.NettyByteBufUtil;
  *
  * 与{@link CommonSerializer} 组合使用
  *
- * @author ZJP
  * @since 2021年07月17日 16:16:14
  **/
 public class StringSerializer implements Serializer<String> {

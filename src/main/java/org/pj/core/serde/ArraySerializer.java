@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.pj.core.util.NettyByteBufUtil;
 
 /**
- * 通用数数组序列化
+ * JAVA数组序列化
  *
  * <pre>
  *   一维数组:
@@ -28,11 +28,11 @@ import org.pj.core.util.NettyByteBufUtil;
  *
  * 与{@link CommonSerializer} 组合使用
  *
- * @author ZJP
  * @since 2021年07月18日 14:17:04
  **/
 public class ArraySerializer implements Serializer<Object> {
 
+  /** 序列化集合 */
   private CommonSerializer serializer;
 
   public ArraySerializer(CommonSerializer serializer) {

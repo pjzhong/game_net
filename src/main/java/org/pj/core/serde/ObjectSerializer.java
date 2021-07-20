@@ -18,7 +18,6 @@ import java.util.List;
  *
  * 与{@link CommonSerializer} 组合使用,本体功能并不完整
  *
- * @author ZJP
  * @since 2021年07月17日 16:16:14
  **/
 public class ObjectSerializer implements Serializer<Object> {

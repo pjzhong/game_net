@@ -55,6 +55,14 @@ public class SerializerTest {
       serializer.writeObject(buf, v);
       assertEquals(v, serializer.read(buf));
     }
+
+    buf.clear();
+    serializer.writeObject(buf, Integer.MIN_VALUE);
+    assertEquals(Integer.MIN_VALUE, (int) serializer.read(buf));
+
+    buf.clear();
+    serializer.writeObject(buf, Integer.MAX_VALUE);
+    assertEquals(Integer.MAX_VALUE, (int) serializer.read(buf));
   }
 
   @Test
