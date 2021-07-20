@@ -18,9 +18,9 @@ import org.pj.core.util.NettyByteBufUtil;
  *
  *    维度总数|维度1长|维度2长|类型ID|元素1_0|元素1_1|元素2_0|元素2_1|
  *
- *    维度总数:1-5字节, 使用varint32编码
- *    维度1长:1-5字节, 使用varint32编码
- *    类型ID:1-5字节, 使用varint32编码
+ *    维度总数:1-5字节, 使用varint32和ZigZag编码
+ *    维度1长:1-5字节, 使用varint32和ZigZag编码
+ *    类型ID:1-5字节, 使用varint32和ZigZag编码
  *    元素:实现决定
  * </pre>
  * <p>1.数组长宽必须一致</p>
