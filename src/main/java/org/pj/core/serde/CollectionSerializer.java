@@ -3,7 +3,6 @@ package org.pj.core.serde;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.function.Supplier;
 import org.pj.core.util.NettyByteBufUtil;
 
@@ -43,11 +42,8 @@ public class CollectionSerializer implements Serializer<Object> {
   @Override
   public Object readObject(ByteBuf buf) {
     int length = NettyByteBufUtil.readInt32(buf);
-    if (length <= 0) {
-      return Collections.emptyList();
-    }
-
     Collection<Object> collection = factory.get();
+
     for (int i = 0; i < length; i++) {
       collection.add(serializer.readObject(buf));
     }

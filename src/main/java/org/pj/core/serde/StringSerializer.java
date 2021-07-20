@@ -5,7 +5,12 @@ import java.nio.charset.StandardCharsets;
 import org.pj.core.util.NettyByteBufUtil;
 
 /**
- * String序列化实现
+ * String序列化实现,UTF_8编码
+ *
+ * 长度|内容
+ *
+ * 长度:varint和ZigZag编码
+ * 内容:bytes
  *
  * 与{@link CommonSerializer} 组合使用
  *
