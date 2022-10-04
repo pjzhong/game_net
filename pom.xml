@@ -19,7 +19,7 @@
     <junit.jupiter.version>5.5.1</junit.jupiter.version>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
-    <google.protobuf>3.9.1</google.protobuf>
+    <google.protobuf>3.16.3</google.protobuf>
     <netty.version>4.1.42.Final</netty.version>
     <commons-lang3.version>3.9</commons-lang3.version>
     <log4j.version>2.13.1</log4j.version>
